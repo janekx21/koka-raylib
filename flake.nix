@@ -60,6 +60,17 @@
 
           shellHook = ''
             export PKG_CONFIG_PATH="${pkgs.raylib}/lib/pkgconfig:$PKG_CONFIG_PATH"
+
+            # Bake raylib's include/link flags into every `koka` invocation,
+            # so `koka raylib.kk -e` just works without passing --ccopts/
+            # --cclinkopts by hand each time. Koka reads this env var and
+            # prepends it to its own argv (see `koka --help`).
+            # export koka_options="--ccopts=$(pkg-config --cflags raylib) --cclinkopts=$(pkg-config --libs raylib)"
+            # This does not work (koka bug) use:
+            # koka raylib.kk -e \
+            #   --ccopts="$(pkg-config --cflags raylib)" \
+            #   --cclinkopts="$(pkg-config --libs raylib)"            
+
             echo "koka-raylib dev shell"
             echo "  koka:   $(koka --version 2>/dev/null || echo 'not found')"
             echo "  raylib: ${pkgs.raylib.version}"
