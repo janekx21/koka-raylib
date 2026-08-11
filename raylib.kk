@@ -1,319 +1,315 @@
 // raylib.kk
+// Koka bindings for raylib (core window, shapes, text, timing, input).
+// Scope: no textures, models, 3D camera, audio, or shaders yet -- those
+// need explicit resource lifetime design (Load/Unload) and are a follow-up.
+
+module raylib
+
+import std/num/int32
+
 extern import
   c file "raylib_koka.c"
 
+// ----------------------------------------------------------------------
+// Effect alias
+// ----------------------------------------------------------------------
+// ui       : touches the graphics system
+// st<global>: mutates raylib's internal global engine state
+// ndet     : results depend on the outside world (e.g. window-should-close)
 pub alias raylib-io = <ui, st<global>, ndet>
 
-extern init-window(width: int, height: int) : raylib-io ()
+// ----------------------------------------------------------------------
+// Core value types
+// ----------------------------------------------------------------------
+// These exist only on the Koka side -- they are never passed across the
+// FFI boundary as structs. The C shim always takes/returns flat scalars.
+
+pub struct vector2
+  x : float64
+  y : float64
+
+pub struct rgba
+  r : int32
+  g : int32
+  b : int32
+  a : int32
+
+pub struct rect
+  x : float64
+  y : float64
+  w : float64
+  h : float64
+
+// A handful of raylib's built-in colors (see raylib.h for the full list;
+// they're trivial to add: RAYWHITE is { 245, 245, 245, 255 }, etc.)
+pub val raywhite    = Rgba(245.i32, 245.i32, 245.i32, 255.i32)
+pub val white       = Rgba(255.i32, 255.i32, 255.i32, 255.i32)
+pub val black       = Rgba(0.i32, 0.i32, 0.i32, 255.i32)
+pub val light-gray  = Rgba(200.i32, 200.i32, 200.i32, 255.i32)
+pub val gray        = Rgba(130.i32, 130.i32, 130.i32, 255.i32)
+pub val dark-gray   = Rgba(80.i32, 80.i32, 80.i32, 255.i32)
+pub val red         = Rgba(230.i32, 41.i32, 55.i32, 255.i32)
+pub val green       = Rgba(0.i32, 228.i32, 48.i32, 255.i32)
+pub val blue        = Rgba(0.i32, 121.i32, 241.i32, 255.i32)
+pub val yellow      = Rgba(253.i32, 249.i32, 0.i32, 255.i32)
+pub val gold        = Rgba(255.i32, 203.i32, 0.i32, 255.i32)
+pub val orange      = Rgba(255.i32, 161.i32, 0.i32, 255.i32)
+pub val pink        = Rgba(255.i32, 109.i32, 194.i32, 255.i32)
+pub val purple      = Rgba(200.i32, 122.i32, 255.i32, 255.i32)
+pub val sky-blue    = Rgba(102.i32, 191.i32, 255.i32, 255.i32)
+pub val lime        = Rgba(0.i32, 158.i32, 47.i32, 255.i32)
+pub val magenta     = Rgba(255.i32, 0.i32, 255.i32, 255.i32)
+pub val blank       = Rgba(0.i32, 0.i32, 0.i32, 0.i32)
+
+// A few common raylib keyboard key codes (raylib.KeyboardKey).
+// These are stable GLFW-style key codes; add more as needed by copying
+// the integer values straight from raylib.h's KeyboardKey enum.
+pub val key-space     : int32 = 32.i32
+pub val key-escape    : int32 = 256.i32
+pub val key-enter     : int32 = 257.i32
+pub val key-tab       : int32 = 258.i32
+pub val key-backspace : int32 = 259.i32
+pub val key-right     : int32 = 262.i32
+pub val key-left      : int32 = 263.i32
+pub val key-down      : int32 = 264.i32
+pub val key-up        : int32 = 265.i32
+
+// Mouse buttons (raylib.MouseButton)
+pub val mouse-button-left   : int32 = 0.i32
+pub val mouse-button-right  : int32 = 1.i32
+pub val mouse-button-middle : int32 = 2.i32
+
+// ----------------------------------------------------------------------
+// Window management
+// ----------------------------------------------------------------------
+
+extern init-window(width: int32, height: int32, title: string) : raylib-io ()
   c "kk_init_window"
-
-extern set-target-fps(fps: int) : raylib-io ()
-  c "kk_set_target_fps"
-
-extern window-should-close() : raylib-io bool
-  c "kk_window_should_close"
-
-extern begin-drawing() : raylib-io ()
-  c "kk_begin_drawing"
-
-extern clear-background() : raylib-io ()
-  c "kk_clear_background"
-
-extern end-drawing() : raylib-io ()
-  c "kk_end_drawing"
 
 extern close-window() : raylib-io ()
   c "kk_close_window"
 
+extern window-should-close() : raylib-io bool
+  c "kk_window_should_close"
 
-// TODO add all other functions
-// // Window-related functions
-// DONE void InitWindow(int width, int height, const char *title);  // Initialize window and OpenGL context
-// DONE void CloseWindow(void);                                     // Close window and unload OpenGL context
-// DONE bool WindowShouldClose(void);                               // Check if application should close (KEY_ESCAPE pressed or windows close icon clicked)
-// bool IsWindowReady(void);                                   // Check if window has been initialized successfully
-// bool IsWindowFullscreen(void);                              // Check if window is currently fullscreen
-// bool IsWindowHidden(void);                                  // Check if window is currently hidden
-// bool IsWindowMinimized(void);                               // Check if window is currently minimized
-// bool IsWindowMaximized(void);                               // Check if window is currently maximized
-// bool IsWindowFocused(void);                                 // Check if window is currently focused
-// bool IsWindowResized(void);                                 // Check if window has been resized last frame
-// bool IsWindowState(unsigned int flag);                      // Check if one specific window flag is enabled
-// void SetWindowState(unsigned int flags);                    // Set window configuration state using flags
-// void ClearWindowState(unsigned int flags);                  // Clear window configuration state flags
-// void ToggleFullscreen(void);                                // Toggle window state: fullscreen/windowed, resizes monitor to match window resolution
-// void ToggleBorderlessWindowed(void);                        // Toggle window state: borderless windowed, resizes window to match monitor resolution
-// void MaximizeWindow(void);                                  // Set window state: maximized, if resizable
-// void MinimizeWindow(void);                                  // Set window state: minimized, if resizable
-// void RestoreWindow(void);                                   // Restore window from being minimized/maximized
-// void SetWindowIcon(Image image);                            // Set icon for window (single image, RGBA 32bit)
-// void SetWindowIcons(Image *images, int count);              // Set icon for window (multiple images, RGBA 32bit)
-// void SetWindowTitle(const char *title);                     // Set title for window
-// void SetWindowPosition(int x, int y);                       // Set window position on screen
-// void SetWindowMonitor(int monitor);                         // Set monitor for the current window
-// void SetWindowMinSize(int width, int height);               // Set window minimum dimensions (for FLAG_WINDOW_RESIZABLE)
-// void SetWindowMaxSize(int width, int height);               // Set window maximum dimensions (for FLAG_WINDOW_RESIZABLE)
-// void SetWindowSize(int width, int height);                  // Set window dimensions
-// void SetWindowOpacity(float opacity);                       // Set window opacity [0.0f..1.0f]
-// void SetWindowFocused(void);                                // Set window focused
-// void *GetWindowHandle(void);                                // Get native window handle
-// int GetScreenWidth(void);                                   // Get current screen width
-// int GetScreenHeight(void);                                  // Get current screen height
-// int GetRenderWidth(void);                                   // Get current render width (it considers HiDPI)
-// int GetRenderHeight(void);                                  // Get current render height (it considers HiDPI)
-// int GetMonitorCount(void);                                  // Get number of connected monitors
-// int GetCurrentMonitor(void);                                // Get current monitor where window is placed
-// Vector2 GetMonitorPosition(int monitor);                    // Get specified monitor position
-// int GetMonitorWidth(int monitor);                           // Get specified monitor width (current video mode used by monitor)
-// int GetMonitorHeight(int monitor);                          // Get specified monitor height (current video mode used by monitor)
-// int GetMonitorPhysicalWidth(int monitor);                   // Get specified monitor physical width in millimetres
-// int GetMonitorPhysicalHeight(int monitor);                  // Get specified monitor physical height in millimetres
-// int GetMonitorRefreshRate(int monitor);                     // Get specified monitor refresh rate
-// Vector2 GetWindowPosition(void);                            // Get window position XY on monitor
-// Vector2 GetWindowScaleDPI(void);                            // Get window scale DPI factor
-// const char *GetMonitorName(int monitor);                    // Get the human-readable, UTF-8 encoded name of the specified monitor
-// void SetClipboardText(const char *text);                    // Set clipboard text content
-// const char *GetClipboardText(void);                         // Get clipboard text content
-// Image GetClipboardImage(void);                              // Get clipboard image content
-// void EnableEventWaiting(void);                              // Enable waiting for events on EndDrawing(), no automatic event polling
-// void DisableEventWaiting(void);                             // Disable waiting for events on EndDrawing(), automatic events polling
+extern xis-window-ready() : raylib-io bool
+  c "kk_is_window_ready"
+pub fun is-window-ready() : raylib-io bool { xis-window-ready() }
 
-// // Cursor-related functions
-// void ShowCursor(void);                                      // Shows cursor
-// void HideCursor(void);                                      // Hides cursor
-// bool IsCursorHidden(void);                                  // Check if cursor is not visible
-// void EnableCursor(void);                                    // Enables cursor (unlock cursor)
-// void DisableCursor(void);                                   // Disables cursor (lock cursor)
-// bool IsCursorOnScreen(void);                                // Check if cursor is on the screen
+extern xis-window-fullscreen() : raylib-io bool
+  c "kk_is_window_fullscreen"
+pub fun is-window-fullscreen() : raylib-io bool { xis-window-fullscreen() }
 
-// // Drawing-related functions
-// DONE void ClearBackground(Color color);                          // Set background color (framebuffer clear color)
-// DONE void BeginDrawing(void);                                    // Setup canvas (framebuffer) to start drawing
-// DONE void EndDrawing(void);                                      // End canvas drawing and swap buffers (double buffering)
-// void BeginMode2D(Camera2D camera);                          // Begin 2D mode with custom camera (2D)
-// void EndMode2D(void);                                       // Ends 2D mode with custom camera
-// void BeginMode3D(Camera3D camera);                          // Begin 3D mode with custom camera (3D)
-// void EndMode3D(void);                                       // Ends 3D mode and returns to default 2D orthographic mode
-// void BeginTextureMode(RenderTexture2D target);              // Begin drawing to render texture
-// void EndTextureMode(void);                                  // Ends drawing to render texture
-// void BeginShaderMode(Shader shader);                        // Begin custom shader drawing
-// void EndShaderMode(void);                                   // End custom shader drawing (use default shader)
-// void BeginBlendMode(int mode);                              // Begin blending mode (alpha, additive, multiplied, subtract, custom)
-// void EndBlendMode(void);                                    // End blending mode (reset to default: alpha blending)
-// void BeginScissorMode(int x, int y, int width, int height); // Begin scissor mode (define screen area for following drawing)
-// void EndScissorMode(void);                                  // End scissor mode
-// void BeginVrStereoMode(VrStereoConfig config);              // Begin stereo rendering (requires VR simulator)
-// void EndVrStereoMode(void);                                 // End stereo rendering (requires VR simulator)
+extern xtoggle-fullscreen() : raylib-io ()
+  c "kk_toggle_fullscreen"
+pub fun toggle-fullscreen() : raylib-io () { xtoggle-fullscreen() }
 
-// // VR stereo config functions for VR simulator
-// VrStereoConfig LoadVrStereoConfig(VrDeviceInfo device);     // Load VR stereo config for VR simulator device parameters
-// void UnloadVrStereoConfig(VrStereoConfig config);           // Unload VR stereo config
+extern xset-window-title(title: string) : raylib-io ()
+  c "kk_set_window_title"
+pub fun set-window-title(title: string) : raylib-io () { xset-window-title(title) }
 
-// // Shader management functions
-// // NOTE: Shader functionality is not available on OpenGL 1.1
-// Shader LoadShader(const char *vsFileName, const char *fsFileName);   // Load shader from files and bind default locations
-// Shader LoadShaderFromMemory(const char *vsCode, const char *fsCode); // Load shader from code strings and bind default locations
-// bool IsShaderValid(Shader shader);                                   // Check if a shader is valid (loaded on GPU)
-// int GetShaderLocation(Shader shader, const char *uniformName);       // Get shader uniform location
-// int GetShaderLocationAttrib(Shader shader, const char *attribName);  // Get shader attribute location
-// void SetShaderValue(Shader shader, int locIndex, const void *value, int uniformType); // Set shader uniform value
-// void SetShaderValueV(Shader shader, int locIndex, const void *value, int uniformType, int count); // Set shader uniform value vector
-// void SetShaderValueMatrix(Shader shader, int locIndex, Matrix mat);  // Set shader uniform value (matrix 4x4)
-// void SetShaderValueTexture(Shader shader, int locIndex, Texture2D texture); // Set shader uniform value and bind the texture (sampler2d)
-// void UnloadShader(Shader shader);                                    // Unload shader from GPU memory (VRAM)
+extern xset-window-size(width: int32, height: int32) : raylib-io ()
+  c "kk_set_window_size"
+pub fun set-window-size(width: int32, height: int32) : raylib-io ()
+  xset-window-size(width, height)
 
-// // Screen-space-related functions
-// Ray GetScreenToWorldRay(Vector2 position, Camera camera);         // Get a ray trace from screen position (i.e mouse)
-// Ray GetScreenToWorldRayEx(Vector2 position, Camera camera, int width, int height); // Get a ray trace from screen position (i.e mouse) in a viewport
-// Vector2 GetWorldToScreen(Vector3 position, Camera camera);        // Get the screen space position for a 3d world space position
-// Vector2 GetWorldToScreenEx(Vector3 position, Camera camera, int width, int height); // Get size position for a 3d world space position
-// Vector2 GetWorldToScreen2D(Vector2 position, Camera2D camera);    // Get the screen space position for a 2d camera world space position
-// Vector2 GetScreenToWorld2D(Vector2 position, Camera2D camera);    // Get the world space position for a 2d camera screen space position
-// Matrix GetCameraMatrix(Camera camera);                            // Get camera transform matrix (view matrix)
-// Matrix GetCameraMatrix2D(Camera2D camera);                        // Get camera 2d transform matrix
+extern xget-screen-width() : raylib-io int32
+  c "kk_get_screen_width"
+pub fun get-screen-width() : raylib-io int32 { xget-screen-width() }
 
-// // Timing-related functions
-// DONE void SetTargetFPS(int fps);                       // Set target FPS (maximum)
-// float GetFrameTime(void);                         // Get time in seconds for last frame drawn (delta time)
-// double GetTime(void);                             // Get elapsed time in seconds since InitWindow()
-// int GetFPS(void);                                 // Get current FPS
+extern xget-screen-height() : raylib-io int32
+  c "kk_get_screen_height"
+pub fun get-screen-height() : raylib-io int32 { xget-screen-height() }
 
-// // Custom frame control functions
-// // NOTE: Those functions are intended for advanced users that want full control over the frame processing
-// // By default EndDrawing() does this job: draws everything + SwapScreenBuffer() + manage frame timing + PollInputEvents()
-// // To avoid that behaviour and control frame processes manually, enable in config.h: SUPPORT_CUSTOM_FRAME_CONTROL
-// void SwapScreenBuffer(void);                      // Swap back buffer with front buffer (screen drawing)
-// void PollInputEvents(void);                       // Register all input events
-// void WaitTime(double seconds);                    // Wait for some time (halt program execution)
+// ----------------------------------------------------------------------
+// Drawing
+// ----------------------------------------------------------------------
 
-// // Random values generation functions
-// void SetRandomSeed(unsigned int seed);            // Set the seed for the random number generator
-// int GetRandomValue(int min, int max);             // Get a random value between min and max (both included)
-// int *LoadRandomSequence(unsigned int count, int min, int max); // Load random values sequence, no values repeated
-// void UnloadRandomSequence(int *sequence);         // Unload random values sequence
+extern begin-drawing() : raylib-io ()
+  c "kk_begin_drawing"
 
-// // Misc. functions
-// void TakeScreenshot(const char *fileName);                // Takes a screenshot of current screen (filename extension defines format)
-// void SetConfigFlags(unsigned int flags);                  // Setup init configuration flags (view FLAGS)
-// void OpenURL(const char *url);                            // Open URL with default system browser (if available)
+extern end-drawing() : raylib-io ()
+  c "kk_end_drawing"
 
-// // Logging system
-// void SetTraceLogLevel(int logLevel);                      // Set the current threshold (minimum) log level
-// void TraceLog(int logLevel, const char *text, ...);       // Show trace log messages (LOG_DEBUG, LOG_INFO, LOG_WARNING, LOG_ERROR...)
-// void SetTraceLogCallback(TraceLogCallback callback);      // Set custom trace log
+extern xclear-background(r: int32, g: int32, b: int32, a: int32) : raylib-io ()
+  c "kk_clear_background"
+pub fun clear-background(color: rgba) : raylib-io ()
+  xclear-background(color.r, color.g, color.b, color.a)
 
-// // Memory management, using internal allocators
-// void *MemAlloc(unsigned int size);                        // Internal memory allocator
-// void *MemRealloc(void *ptr, unsigned int size);           // Internal memory reallocator
-// void MemFree(void *ptr);                                  // Internal memory free
+extern xbegin-scissor-mode(x: int32, y: int32, width: int32, height: int32) : raylib-io ()
+  c "kk_begin_scissor_mode"
+pub fun begin-scissor-mode(x: int32, y: int32, width: int32, height: int32) : raylib-io ()
+  xbegin-scissor-mode(x, y, width, height)
 
-// // File system management functions
-// unsigned char *LoadFileData(const char *fileName, int *dataSize); // Load file data as byte array (read)
-// void UnloadFileData(unsigned char *data);                     // Unload file data allocated by LoadFileData()
-// bool SaveFileData(const char *fileName, void *data, int dataSize); // Save data to file from byte array (write), returns true on success
-// bool ExportDataAsCode(const unsigned char *data, int dataSize, const char *fileName); // Export data to code (.h), returns true on success
-// char *LoadFileText(const char *fileName);                     // Load text data from file (read), returns a '\0' terminated string
-// void UnloadFileText(char *text);                              // Unload file text data allocated by LoadFileText()
-// bool SaveFileText(const char *fileName, const char *text);    // Save text data to file (write), string must be '\0' terminated, returns true on success
+extern end-scissor-mode() : raylib-io ()
+  c "kk_end_scissor_mode"
 
-// // File access custom callbacks
-// // WARNING: Callbacks setup is intended for advanced users
-// void SetLoadFileDataCallback(LoadFileDataCallback callback);  // Set custom file binary data loader
-// void SetSaveFileDataCallback(SaveFileDataCallback callback);  // Set custom file binary data saver
-// void SetLoadFileTextCallback(LoadFileTextCallback callback);  // Set custom file text data loader
-// void SetSaveFileTextCallback(SaveFileTextCallback callback);  // Set custom file text data saver
+// ----------------------------------------------------------------------
+// Timing
+// ----------------------------------------------------------------------
 
-// int FileRename(const char *fileName, const char *fileRename); // Rename file (if exists)
-// int FileRemove(const char *fileName);                         // Remove file (if exists)
-// int FileCopy(const char *srcPath, const char *dstPath);       // Copy file from one path to another, dstPath created if it doesn't exist
-// int FileMove(const char *srcPath, const char *dstPath);       // Move file from one directory to another, dstPath created if it doesn't exist
-// int FileTextReplace(const char *fileName, const char *search, const char *replacement); // Replace text in an existing file
-// int FileTextFindIndex(const char *fileName, const char *search); // Find text in existing file
-// bool FileExists(const char *fileName);                        // Check if file exists
-// bool DirectoryExists(const char *dirPath);                    // Check if a directory path exists
-// bool IsFileExtension(const char *fileName, const char *ext);  // Check file extension (recommended include point: .png, .wav)
-// int GetFileLength(const char *fileName);                      // Get file length in bytes (NOTE: GetFileSize() conflicts with windows.h)
-// long GetFileModTime(const char *fileName);                    // Get file modification time (last write time)
-// const char *GetFileExtension(const char *fileName);           // Get pointer to extension for a filename string (includes dot: '.png')
-// const char *GetFileName(const char *filePath);                // Get pointer to filename for a path string
-// const char *GetFileNameWithoutExt(const char *filePath);      // Get filename string without extension (uses static string)
-// const char *GetDirectoryPath(const char *filePath);           // Get full path for a given fileName with path (uses static string)
-// const char *GetPrevDirectoryPath(const char *dirPath);        // Get previous directory path for a given path (uses static string)
-// const char *GetWorkingDirectory(void);                        // Get current working directory (uses static string)
-// const char *GetApplicationDirectory(void);                    // Get the directory of the running application (uses static string)
-// int MakeDirectory(const char *dirPath);                       // Create directories (including full path requested), returns 0 on success
-// bool ChangeDirectory(const char *dirPath);                    // Change working directory, return true on success
-// bool IsPathFile(const char *path);                            // Check if a given path is a file or a directory
-// bool IsFileNameValid(const char *fileName);                   // Check if fileName is valid for the platform/OS
-// FilePathList LoadDirectoryFiles(const char *dirPath);         // Load directory filepaths, files and directories, no subdirs scan
-// FilePathList LoadDirectoryFilesEx(const char *basePath, const char *filter, bool scanSubdirs); // Load directory filepaths with extension filtering and subdir scan; some filters available: "*.*", "FILES*", "DIRS*"
-// void UnloadDirectoryFiles(FilePathList files);                // Unload filepaths
-// bool IsFileDropped(void);                                     // Check if a file has been dropped into window
-// FilePathList LoadDroppedFiles(void);                          // Load dropped filepaths
-// void UnloadDroppedFiles(FilePathList files);                  // Unload dropped filepaths
-// unsigned int GetDirectoryFileCount(const char *dirPath);      // Get the file count in a directory
-// unsigned int GetDirectoryFileCountEx(const char *basePath, const char *filter, bool scanSubdirs); // Get the file count in a directory with extension filtering and recursive directory scan. Use 'DIR' in the filter string to include directories in the result
+extern set-target-fps(fps: int32) : raylib-io ()
+  c "kk_set_target_fps"
 
-// // Compression/Encoding functionality
-// unsigned char *CompressData(const unsigned char *data, int dataSize, int *compDataSize);        // Compress data (DEFLATE algorithm), memory must be MemFree()
-// unsigned char *DecompressData(const unsigned char *compData, int compDataSize, int *dataSize);  // Decompress data (DEFLATE algorithm), memory must be MemFree()
-// char *EncodeDataBase64(const unsigned char *data, int dataSize, int *outputSize);               // Encode data to Base64 string (includes NULL terminator), memory must be MemFree()
-// unsigned char *DecodeDataBase64(const char *text, int *outputSize);                             // Decode Base64 string (expected NULL terminated), memory must be MemFree()
-// unsigned int ComputeCRC32(unsigned char *data, int dataSize); // Compute CRC32 hash code
-// unsigned int *ComputeMD5(unsigned char *data, int dataSize);  // Compute MD5 hash code, returns static int[4] (16 bytes)
-// unsigned int *ComputeSHA1(unsigned char *data, int dataSize); // Compute SHA1 hash code, returns static int[5] (20 bytes)
-// unsigned int *ComputeSHA256(unsigned char *data, int dataSize); // Compute SHA256 hash code, returns static int[8] (32 bytes)
+extern xget-frame-time() : raylib-io float64
+  c "kk_get_frame_time"
+pub fun get-frame-time() : raylib-io float64 { xget-frame-time() }
 
-// // Automation events functionality
-// AutomationEventList LoadAutomationEventList(const char *fileName); // Load automation events list from file, NULL for empty list, capacity = MAX_AUTOMATION_EVENTS
-// void UnloadAutomationEventList(AutomationEventList list);   // Unload automation events list from file
-// bool ExportAutomationEventList(AutomationEventList list, const char *fileName); // Export automation events list as text file
-// void SetAutomationEventList(AutomationEventList *list);     // Set automation event list to record to
-// void SetAutomationEventBaseFrame(int frame);                // Set automation event internal base frame to start recording
-// void StartAutomationEventRecording(void);                   // Start recording automation events (AutomationEventList must be set)
-// void StopAutomationEventRecording(void);                    // Stop recording automation events
-// void PlayAutomationEvent(AutomationEvent event);            // Play a recorded automation event
+extern xget-time() : raylib-io float64
+  c "kk_get_time"
+pub fun get-time() : raylib-io float64 { xget-time() }
 
-// //------------------------------------------------------------------------------------
-// // Input Handling Functions (Module: core)
-// //------------------------------------------------------------------------------------
+extern xget-fps() : raylib-io int32
+  c "kk_get_fps"
+pub fun get-fps() : raylib-io int32 { xget-fps() }
 
-// // Input-related functions: keyboard
-// bool IsKeyPressed(int key);                             // Check if a key has been pressed once
-// bool IsKeyPressedRepeat(int key);                       // Check if a key has been pressed again
-// bool IsKeyDown(int key);                                // Check if a key is being pressed
-// bool IsKeyReleased(int key);                            // Check if a key has been released once
-// bool IsKeyUp(int key);                                  // Check if a key is NOT being pressed
-// int GetKeyPressed(void);                                // Get key pressed (keycode), call it multiple times for keys queued, returns 0 when the queue is empty
-// int GetCharPressed(void);                               // Get char pressed (unicode), call it multiple times for chars queued, returns 0 when the queue is empty
-// const char *GetKeyName(int key);                        // Get name of a QWERTY key on the current keyboard layout (eg returns string 'q' for KEY_A on an AZERTY keyboard)
-// void SetExitKey(int key);                               // Set a custom key to exit program (default is ESC)
+// ----------------------------------------------------------------------
+// Shapes (2D)
+// ----------------------------------------------------------------------
 
-// // Input-related functions: gamepads
-// bool IsGamepadAvailable(int gamepad);                   // Check if a gamepad is available
-// const char *GetGamepadName(int gamepad);                // Get gamepad internal name id
-// bool IsGamepadButtonPressed(int gamepad, int button);   // Check if a gamepad button has been pressed once
-// bool IsGamepadButtonDown(int gamepad, int button);      // Check if a gamepad button is being pressed
-// bool IsGamepadButtonReleased(int gamepad, int button);  // Check if a gamepad button has been released once
-// bool IsGamepadButtonUp(int gamepad, int button);        // Check if a gamepad button is NOT being pressed
-// int GetGamepadButtonPressed(void);                      // Get the last gamepad button pressed
-// int GetGamepadAxisCount(int gamepad);                   // Get axis count for a gamepad
-// float GetGamepadAxisMovement(int gamepad, int axis);    // Get movement value for a gamepad axis
-// int SetGamepadMappings(const char *mappings);           // Set internal gamepad mappings (SDL_GameControllerDB)
-// void SetGamepadVibration(int gamepad, float leftMotor, float rightMotor, float duration); // Set gamepad vibration for both motors (duration in seconds)
+extern xdraw-pixel(x: float64, y: float64, r: int32, g: int32, b: int32, a: int32) : raylib-io ()
+  c "kk_draw_pixel"
+pub fun draw-pixel(pos: vector2, color: rgba) : raylib-io ()
+  xdraw-pixel(pos.x, pos.y, color.r, color.g, color.b, color.a)
 
-// // Input-related functions: mouse
-// bool IsMouseButtonPressed(int button);                  // Check if a mouse button has been pressed once
-// bool IsMouseButtonDown(int button);                     // Check if a mouse button is being pressed
-// bool IsMouseButtonReleased(int button);                 // Check if a mouse button has been released once
-// bool IsMouseButtonUp(int button);                       // Check if a mouse button is NOT being pressed
-// int GetMouseX(void);                                    // Get mouse position X
-// int GetMouseY(void);                                    // Get mouse position Y
-// Vector2 GetMousePosition(void);                         // Get mouse position XY
-// Vector2 GetMouseDelta(void);                            // Get mouse delta between frames
-// void SetMousePosition(int x, int y);                    // Set mouse position XY
-// void SetMouseOffset(int offsetX, int offsetY);          // Set mouse offset
-// void SetMouseScale(float scaleX, float scaleY);         // Set mouse scaling
-// float GetMouseWheelMove(void);                          // Get mouse wheel movement for X or Y, whichever is larger
-// Vector2 GetMouseWheelMoveV(void);                       // Get mouse wheel movement for both X and Y
-// void SetMouseCursor(int cursor);                        // Set mouse cursor
+extern xdraw-line(x1: float64, y1: float64, x2: float64, y2: float64, r: int32, g: int32, b: int32, a: int32) : raylib-io ()
+  c "kk_draw_line"
+pub fun draw-line(start: vector2, end: vector2, color: rgba) : raylib-io ()
+  xdraw-line(start.x, start.y, end.x, end.y, color.r, color.g, color.b, color.a)
 
-// // Input-related functions: touch
-// int GetTouchX(void);                                    // Get touch position X for touch point 0 (relative to screen size)
-// int GetTouchY(void);                                    // Get touch position Y for touch point 0 (relative to screen size)
-// Vector2 GetTouchPosition(int index);                    // Get touch position XY for a touch point index (relative to screen size)
-// int GetTouchPointId(int index);                         // Get touch point identifier for given index
-// int GetTouchPointCount(void);                           // Get number of touch points
+extern xdraw-line-ex(x1: float64, y1: float64, x2: float64, y2: float64, thick: float64, r: int32, g: int32, b: int32, a: int32) : raylib-io ()
+  c "kk_draw_line_ex"
+pub fun draw-line-ex(start: vector2, end: vector2, thick: float64, color: rgba) : raylib-io ()
+  xdraw-line-ex(start.x, start.y, end.x, end.y, thick, color.r, color.g, color.b, color.a)
 
-// //------------------------------------------------------------------------------------
-// // Gestures and Touch Handling Functions (Module: rgestures)
-// //------------------------------------------------------------------------------------
-// void SetGesturesEnabled(unsigned int flags);            // Enable a set of gestures using flags
-// bool IsGestureDetected(unsigned int gesture);           // Check if a gesture have been detected
-// int GetGestureDetected(void);                           // Get latest detected gesture
-// float GetGestureHoldDuration(void);                     // Get gesture hold time in seconds
-// Vector2 GetGestureDragVector(void);                     // Get gesture drag vector
-// float GetGestureDragAngle(void);                        // Get gesture drag angle
-// Vector2 GetGesturePinchVector(void);                    // Get gesture pinch delta
-// float GetGesturePinchAngle(void);                       // Get gesture pinch angle
+extern xdraw-circle(cx: float64, cy: float64, radius: float64, r: int32, g: int32, b: int32, a: int32) : raylib-io ()
+  c "kk_draw_circle"
+pub fun draw-circle(center: vector2, radius: float64, color: rgba) : raylib-io ()
+  xdraw-circle(center.x, center.y, radius, color.r, color.g, color.b, color.a)
 
-// //------------------------------------------------------------------------------------
-// // Camera System Functions (Module: rcamera)
-// //------------------------------------------------------------------------------------
-// void UpdateCamera(Camera *camera, int mode);            // Update camera position for selected mode
-// void UpdateCameraPro(Camera *camera, Vector3 movement, Vector3 rotation, float zoom); // Update camera movement/rotation
+extern xdraw-circle-lines(cx: float64, cy: float64, radius: float64, r: int32, g: int32, b: int32, a: int32) : raylib-io ()
+  c "kk_draw_circle_lines"
+pub fun draw-circle-lines(center: vector2, radius: float64, color: rgba) : raylib-io ()
+  xdraw-circle-lines(center.x, center.y, radius, color.r, color.g, color.b, color.a)
+
+extern xdraw-rectangle(x: float64, y: float64, w: float64, h: float64, r: int32, g: int32, b: int32, a: int32) : raylib-io ()
+  c "kk_draw_rectangle"
+pub fun draw-rectangle(rectangle: rect, color: rgba) : raylib-io ()
+  xdraw-rectangle(rectangle.x, rectangle.y, rectangle.w, rectangle.h, color.r, color.g, color.b, color.a)
+
+extern xdraw-rectangle-lines(x: float64, y: float64, w: float64, h: float64, r: int32, g: int32, b: int32, a: int32) : raylib-io ()
+  c "kk_draw_rectangle_lines"
+pub fun draw-rectangle-lines(rectangle: rect, color: rgba) : raylib-io ()
+  xdraw-rectangle-lines(rectangle.x, rectangle.y, rectangle.w, rectangle.h, color.r, color.g, color.b, color.a)
+
+// extern xdraw-rectangle-rounded(x: float64, y: float64, w: float64, h: float64, roundness: float64, segments: int32, r: int32, g: int32, b: int32, a: int32) : raylib-io ()
+//   c "kk_draw_rectangle_rounded"
+
+// pub fun draw-rectangle-rounded(rectangle: rect, roundness: float64, segments: int32, color: rgba) : raylib-io ()
+//   xdraw-rectangle-rounded(rectangle.x, rectangle.y, rectangle.w, rectangle.h, roundness, segments, color.r, color.g, color.b, color.a)
+
+// extern xdraw-triangle(x1: float64, y1: float64, x2: float64, y2: float64, x3: float64, y3: float64, r: int32, g: int32, b: int32, a: int32) : raylib-io ()
+//   c "kk_draw_triangle"
+// pub fun draw-triangle(v1: vector2, v2: vector2, v3: vector2, color: rgba) : raylib-io ()
+//   xdraw-triangle(v1.x, v1.y, v2.x, v2.y, v3.x, v3.y, color.r, color.g, color.b, color.a)
+
+extern xdraw-poly(cx: float64, cy: float64, sides: int32, radius: float64, rotation: float64, r: int32, g: int32, b: int32, a: int32) : raylib-io ()
+  c "kk_draw_poly"
+pub fun draw-poly(center: vector2, sides: int32, radius: float64, rotation: float64, color: rgba) : raylib-io ()
+  xdraw-poly(center.x, center.y, sides, radius, rotation, color.r, color.g, color.b, color.a)
+
+extern xcheck-collision-recs(x1: float64, y1: float64, w1: float64, h1: float64, x2: float64, y2: float64, w2: float64, h2: float64) : raylib-io bool
+  c "kk_check_collision_recs"
+pub fun check-collision-recs(a: rect, b: rect) : raylib-io bool
+  xcheck-collision-recs(a.x, a.y, a.w, a.h, b.x, b.y, b.w, b.h)
+
+extern xcheck-collision-circles(x1: float64, y1: float64, r1: float64, x2: float64, y2: float64, r2: float64) : raylib-io bool
+  c "kk_check_collision_circles"
+pub fun check-collision-circles(center1: vector2, radius1: float64, center2: vector2, radius2: float64) : raylib-io bool
+  xcheck-collision-circles(center1.x, center1.y, radius1, center2.x, center2.y, radius2)
+
+extern xcheck-collision-point-rec(px: float64, py: float64, x: float64, y: float64, w: float64, h: float64) : raylib-io bool
+  c "kk_check_collision_point_rec"
+pub fun check-collision-point-rec(point: vector2, rectangle: rect) : raylib-io bool
+  xcheck-collision-point-rec(point.x, point.y, rectangle.x, rectangle.y, rectangle.w, rectangle.h)
+
+// ----------------------------------------------------------------------
+// Text (default font only -- custom font loading is a follow-up)
+// ----------------------------------------------------------------------
+
+extern xdraw-text(text: string, x: int32, y: int32, font-size: int32, r: int32, g: int32, b: int32, a: int32) : raylib-io ()
+  c "kk_draw_text"
+pub fun draw-text(text: string, x: int32, y: int32, font-size: int32, color: rgba) : raylib-io ()
+  xdraw-text(text, x, y, font-size, color.r, color.g, color.b, color.a)
+
+extern draw-fps(x: int32, y: int32) : raylib-io ()
+  c "kk_draw_fps"
+
+extern measure-text(text: string, font-size: int32) : raylib-io int32
+  c "kk_measure_text"
+
+// ----------------------------------------------------------------------
+// Input: keyboard
+// ----------------------------------------------------------------------
+
+extern is-key-pressed(key: int32) : raylib-io bool
+  c "kk_is_key_pressed"
+
+extern is-key-down(key: int32) : raylib-io bool
+  c "kk_is_key_down"
+
+extern is-key-released(key: int32) : raylib-io bool
+  c "kk_is_key_released"
+
+extern is-key-up(key: int32) : raylib-io bool
+  c "kk_is_key_up"
+
+extern get-key-pressed() : raylib-io int32
+  c "kk_get_key_pressed"
+
+// ----------------------------------------------------------------------
+// Input: mouse
+// ----------------------------------------------------------------------
+
+extern is-mouse-button-pressed(button: int32) : raylib-io bool
+  c "kk_is_mouse_button_pressed"
+
+extern is-mouse-button-down(button: int32) : raylib-io bool
+  c "kk_is_mouse_button_down"
+
+extern is-mouse-button-released(button: int32) : raylib-io bool
+  c "kk_is_mouse_button_released"
+
+extern is-mouse-button-up(button: int32) : raylib-io bool
+  c "kk_is_mouse_button_up"
+
+extern xget-mouse-x() : raylib-io float64
+  c "kk_get_mouse_x"
+
+extern xget-mouse-y() : raylib-io float64
+  c "kk_get_mouse_y"
+
+pub fun get-mouse-position() : raylib-io vector2
+  Vector2(xget-mouse-x(), xget-mouse-y())
+
+extern xget-mouse-wheel-move() : raylib-io float64
+  c "kk_get_mouse_wheel_move"
+pub fun get-mouse-wheel-move() : raylib-io float64 { xget-mouse-wheel-move() }
+
 
 
 // This is just for testing out some stuff
 fun main() {
-  init-window(640, 480)
-  set-target-fps(60)
-
-  while (fn() !window-should-close())
-    {
-      begin-drawing()
-      clear-background()
-      end-drawing()
-    }
+  init-window(800.i32, 450.i32, "raylib + koka")
+  set-target-fps(60.i32)
+  while (fn() !(window-should-close())) {
+    begin-drawing()
+    clear-background(raywhite)
+    draw-circle(Vector2(400.0, 225.0), 50.0, red)
+    draw-rectangle(Rect(20.0, 20.0, 200.0, 80.0), sky-blue)
+    draw-text("Hello from Koka!", 20.i32, 120.i32, 20.i32, black)
+    draw-fps(10.i32, 10.i32)
+    end-drawing()
+  }
   close-window()
 }

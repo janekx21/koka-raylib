@@ -1,19 +1,16 @@
 // raylib_koka.c
 #include <raylib.h>
 
-kk_unit_t kk_init_window(kk_integer_t width, kk_integer_t height, kk_context_t* ctx) {
-    printf("Init window\n");
-    InitWindow(kk_integer_clamp32(width, ctx), kk_integer_clamp32(height, ctx), "raylib [core] example - basic window");
-    return kk_Unit;
-}
+// ------------------------------------------------------------------
+// Window management
+// ------------------------------------------------------------------
 
-kk_unit_t kk_set_target_fps(kk_integer_t fps, kk_context_t* ctx) {
-    SetTargetFPS(kk_integer_clamp32(fps, ctx));
+kk_unit_t kk_init_window(int32_t width, int32_t height, kk_string_t title, kk_context_t* ctx) {
+    kk_ssize_t len = kk_string_len(title, ctx);
+    const char* ctitle = kk_string_cbuf_borrow(title, &len, ctx);
+    InitWindow(width, height, ctitle);
+    kk_string_drop(title, ctx);
     return kk_Unit;
-}
-
-bool kk_window_should_close(kk_context_t* ctx) {
-    return WindowShouldClose();
 }
 
 kk_unit_t kk_close_window(kk_context_t* ctx) {
@@ -21,13 +18,49 @@ kk_unit_t kk_close_window(kk_context_t* ctx) {
     return kk_Unit;
 }
 
-kk_unit_t kk_begin_drawing(kk_context_t* ctx) {
-    BeginDrawing();
+bool kk_window_should_close(kk_context_t* ctx) {
+    return WindowShouldClose();
+}
+
+bool kk_is_window_ready(kk_context_t* ctx) {
+    return IsWindowReady();
+}
+
+bool kk_is_window_fullscreen(kk_context_t* ctx) {
+    return IsWindowFullscreen();
+}
+
+kk_unit_t kk_toggle_fullscreen(kk_context_t* ctx) {
+    ToggleFullscreen();
     return kk_Unit;
 }
 
-kk_unit_t kk_clear_background(kk_context_t* ctx) {
-    ClearBackground(RAYWHITE);
+kk_unit_t kk_set_window_title(kk_string_t title, kk_context_t* ctx) {
+    const char* ctitle = kk_string_cbuf_borrow(title, NULL, ctx);
+    SetWindowTitle(ctitle);
+    kk_string_drop(title, ctx);
+    return kk_Unit;
+}
+
+kk_unit_t kk_set_window_size(int32_t width, int32_t height, kk_context_t* ctx) {
+    SetWindowSize(width, height);
+    return kk_Unit;
+}
+
+int32_t kk_get_screen_width(kk_context_t* ctx) {
+    return GetScreenWidth();
+}
+
+int32_t kk_get_screen_height(kk_context_t* ctx) {
+    return GetScreenHeight();
+}
+
+// ------------------------------------------------------------------
+// Drawing
+// ------------------------------------------------------------------
+
+kk_unit_t kk_begin_drawing(kk_context_t* ctx) {
+    BeginDrawing();
     return kk_Unit;
 }
 
@@ -36,280 +69,160 @@ kk_unit_t kk_end_drawing(kk_context_t* ctx) {
     return kk_Unit;
 }
 
-// TODO add all other functions
-// // Window-related functions
-// DONE void InitWindow(int width, int height, const char *title);  // Initialize window and OpenGL context
-// DONE void CloseWindow(void);                                     // Close window and unload OpenGL context
-// DONE bool WindowShouldClose(void);                               // Check if application should close (KEY_ESCAPE pressed or windows close icon clicked)
-// bool IsWindowReady(void);                                   // Check if window has been initialized successfully
-// bool IsWindowFullscreen(void);                              // Check if window is currently fullscreen
-// bool IsWindowHidden(void);                                  // Check if window is currently hidden
-// bool IsWindowMinimized(void);                               // Check if window is currently minimized
-// bool IsWindowMaximized(void);                               // Check if window is currently maximized
-// bool IsWindowFocused(void);                                 // Check if window is currently focused
-// bool IsWindowResized(void);                                 // Check if window has been resized last frame
-// bool IsWindowState(unsigned int flag);                      // Check if one specific window flag is enabled
-// void SetWindowState(unsigned int flags);                    // Set window configuration state using flags
-// void ClearWindowState(unsigned int flags);                  // Clear window configuration state flags
-// void ToggleFullscreen(void);                                // Toggle window state: fullscreen/windowed, resizes monitor to match window resolution
-// void ToggleBorderlessWindowed(void);                        // Toggle window state: borderless windowed, resizes window to match monitor resolution
-// void MaximizeWindow(void);                                  // Set window state: maximized, if resizable
-// void MinimizeWindow(void);                                  // Set window state: minimized, if resizable
-// void RestoreWindow(void);                                   // Restore window from being minimized/maximized
-// void SetWindowIcon(Image image);                            // Set icon for window (single image, RGBA 32bit)
-// void SetWindowIcons(Image *images, int count);              // Set icon for window (multiple images, RGBA 32bit)
-// void SetWindowTitle(const char *title);                     // Set title for window
-// void SetWindowPosition(int x, int y);                       // Set window position on screen
-// void SetWindowMonitor(int monitor);                         // Set monitor for the current window
-// void SetWindowMinSize(int width, int height);               // Set window minimum dimensions (for FLAG_WINDOW_RESIZABLE)
-// void SetWindowMaxSize(int width, int height);               // Set window maximum dimensions (for FLAG_WINDOW_RESIZABLE)
-// void SetWindowSize(int width, int height);                  // Set window dimensions
-// void SetWindowOpacity(float opacity);                       // Set window opacity [0.0f..1.0f]
-// void SetWindowFocused(void);                                // Set window focused
-// void *GetWindowHandle(void);                                // Get native window handle
-// int GetScreenWidth(void);                                   // Get current screen width
-// int GetScreenHeight(void);                                  // Get current screen height
-// int GetRenderWidth(void);                                   // Get current render width (it considers HiDPI)
-// int GetRenderHeight(void);                                  // Get current render height (it considers HiDPI)
-// int GetMonitorCount(void);                                  // Get number of connected monitors
-// int GetCurrentMonitor(void);                                // Get current monitor where window is placed
-// Vector2 GetMonitorPosition(int monitor);                    // Get specified monitor position
-// int GetMonitorWidth(int monitor);                           // Get specified monitor width (current video mode used by monitor)
-// int GetMonitorHeight(int monitor);                          // Get specified monitor height (current video mode used by monitor)
-// int GetMonitorPhysicalWidth(int monitor);                   // Get specified monitor physical width in millimetres
-// int GetMonitorPhysicalHeight(int monitor);                  // Get specified monitor physical height in millimetres
-// int GetMonitorRefreshRate(int monitor);                     // Get specified monitor refresh rate
-// Vector2 GetWindowPosition(void);                            // Get window position XY on monitor
-// Vector2 GetWindowScaleDPI(void);                            // Get window scale DPI factor
-// const char *GetMonitorName(int monitor);                    // Get the human-readable, UTF-8 encoded name of the specified monitor
-// void SetClipboardText(const char *text);                    // Set clipboard text content
-// const char *GetClipboardText(void);                         // Get clipboard text content
-// Image GetClipboardImage(void);                              // Get clipboard image content
-// void EnableEventWaiting(void);                              // Enable waiting for events on EndDrawing(), no automatic event polling
-// void DisableEventWaiting(void);                             // Disable waiting for events on EndDrawing(), automatic events polling
+kk_unit_t kk_clear_background(int32_t r, int32_t g, int32_t b, int32_t a, kk_context_t* ctx) {
+    ClearBackground((Color){ (unsigned char)r, (unsigned char)g, (unsigned char)b, (unsigned char)a });
+    return kk_Unit;
+}
 
-// // Cursor-related functions
-// void ShowCursor(void);                                      // Shows cursor
-// void HideCursor(void);                                      // Hides cursor
-// bool IsCursorHidden(void);                                  // Check if cursor is not visible
-// void EnableCursor(void);                                    // Enables cursor (unlock cursor)
-// void DisableCursor(void);                                   // Disables cursor (lock cursor)
-// bool IsCursorOnScreen(void);                                // Check if cursor is on the screen
+kk_unit_t kk_begin_scissor_mode(int32_t x, int32_t y, int32_t width, int32_t height, kk_context_t* ctx) {
+    BeginScissorMode(x, y, width, height);
+    return kk_Unit;
+}
 
-// // Drawing-related functions
-// DONE void ClearBackground(Color color);                          // Set background color (framebuffer clear color)
-// DONE void BeginDrawing(void);                                    // Setup canvas (framebuffer) to start drawing
-// DONE void EndDrawing(void);                                      // End canvas drawing and swap buffers (double buffering)
-// void BeginMode2D(Camera2D camera);                          // Begin 2D mode with custom camera (2D)
-// void EndMode2D(void);                                       // Ends 2D mode with custom camera
-// void BeginMode3D(Camera3D camera);                          // Begin 3D mode with custom camera (3D)
-// void EndMode3D(void);                                       // Ends 3D mode and returns to default 2D orthographic mode
-// void BeginTextureMode(RenderTexture2D target);              // Begin drawing to render texture
-// void EndTextureMode(void);                                  // Ends drawing to render texture
-// void BeginShaderMode(Shader shader);                        // Begin custom shader drawing
-// void EndShaderMode(void);                                   // End custom shader drawing (use default shader)
-// void BeginBlendMode(int mode);                              // Begin blending mode (alpha, additive, multiplied, subtract, custom)
-// void EndBlendMode(void);                                    // End blending mode (reset to default: alpha blending)
-// void BeginScissorMode(int x, int y, int width, int height); // Begin scissor mode (define screen area for following drawing)
-// void EndScissorMode(void);                                  // End scissor mode
-// void BeginVrStereoMode(VrStereoConfig config);              // Begin stereo rendering (requires VR simulator)
-// void EndVrStereoMode(void);                                 // End stereo rendering (requires VR simulator)
+kk_unit_t kk_end_scissor_mode(kk_context_t* ctx) {
+    EndScissorMode();
+    return kk_Unit;
+}
 
-// // VR stereo config functions for VR simulator
-// VrStereoConfig LoadVrStereoConfig(VrDeviceInfo device);     // Load VR stereo config for VR simulator device parameters
-// void UnloadVrStereoConfig(VrStereoConfig config);           // Unload VR stereo config
+// ------------------------------------------------------------------
+// Timing
+// ------------------------------------------------------------------
 
-// // Shader management functions
-// // NOTE: Shader functionality is not available on OpenGL 1.1
-// Shader LoadShader(const char *vsFileName, const char *fsFileName);   // Load shader from files and bind default locations
-// Shader LoadShaderFromMemory(const char *vsCode, const char *fsCode); // Load shader from code strings and bind default locations
-// bool IsShaderValid(Shader shader);                                   // Check if a shader is valid (loaded on GPU)
-// int GetShaderLocation(Shader shader, const char *uniformName);       // Get shader uniform location
-// int GetShaderLocationAttrib(Shader shader, const char *attribName);  // Get shader attribute location
-// void SetShaderValue(Shader shader, int locIndex, const void *value, int uniformType); // Set shader uniform value
-// void SetShaderValueV(Shader shader, int locIndex, const void *value, int uniformType, int count); // Set shader uniform value vector
-// void SetShaderValueMatrix(Shader shader, int locIndex, Matrix mat);  // Set shader uniform value (matrix 4x4)
-// void SetShaderValueTexture(Shader shader, int locIndex, Texture2D texture); // Set shader uniform value and bind the texture (sampler2d)
-// void UnloadShader(Shader shader);                                    // Unload shader from GPU memory (VRAM)
+kk_unit_t kk_set_target_fps(int32_t fps, kk_context_t* ctx) {
+    SetTargetFPS(fps);
+    return kk_Unit;
+}
 
-// // Screen-space-related functions
-// Ray GetScreenToWorldRay(Vector2 position, Camera camera);         // Get a ray trace from screen position (i.e mouse)
-// Ray GetScreenToWorldRayEx(Vector2 position, Camera camera, int width, int height); // Get a ray trace from screen position (i.e mouse) in a viewport
-// Vector2 GetWorldToScreen(Vector3 position, Camera camera);        // Get the screen space position for a 3d world space position
-// Vector2 GetWorldToScreenEx(Vector3 position, Camera camera, int width, int height); // Get size position for a 3d world space position
-// Vector2 GetWorldToScreen2D(Vector2 position, Camera2D camera);    // Get the screen space position for a 2d camera world space position
-// Vector2 GetScreenToWorld2D(Vector2 position, Camera2D camera);    // Get the world space position for a 2d camera screen space position
-// Matrix GetCameraMatrix(Camera camera);                            // Get camera transform matrix (view matrix)
-// Matrix GetCameraMatrix2D(Camera2D camera);                        // Get camera 2d transform matrix
+double kk_get_frame_time(kk_context_t* ctx) {
+    return (double)GetFrameTime();
+}
 
-// // Timing-related functions
-// DONE void SetTargetFPS(int fps);                       // Set target FPS (maximum)
-// float GetFrameTime(void);                         // Get time in seconds for last frame drawn (delta time)
-// double GetTime(void);                             // Get elapsed time in seconds since InitWindow()
-// int GetFPS(void);                                 // Get current FPS
+double kk_get_time(kk_context_t* ctx) {
+    return GetTime();
+}
 
-// // Custom frame control functions
-// // NOTE: Those functions are intended for advanced users that want full control over the frame processing
-// // By default EndDrawing() does this job: draws everything + SwapScreenBuffer() + manage frame timing + PollInputEvents()
-// // To avoid that behaviour and control frame processes manually, enable in config.h: SUPPORT_CUSTOM_FRAME_CONTROL
-// void SwapScreenBuffer(void);                      // Swap back buffer with front buffer (screen drawing)
-// void PollInputEvents(void);                       // Register all input events
-// void WaitTime(double seconds);                    // Wait for some time (halt program execution)
+int32_t kk_get_fps(kk_context_t* ctx) {
+    return GetFPS();
+}
 
-// // Random values generation functions
-// void SetRandomSeed(unsigned int seed);            // Set the seed for the random number generator
-// int GetRandomValue(int min, int max);             // Get a random value between min and max (both included)
-// int *LoadRandomSequence(unsigned int count, int min, int max); // Load random values sequence, no values repeated
-// void UnloadRandomSequence(int *sequence);         // Unload random values sequence
+// ------------------------------------------------------------------
+// Shapes
+// ------------------------------------------------------------------
 
-// // Misc. functions
-// void TakeScreenshot(const char *fileName);                // Takes a screenshot of current screen (filename extension defines format)
-// void SetConfigFlags(unsigned int flags);                  // Setup init configuration flags (view FLAGS)
-// void OpenURL(const char *url);                            // Open URL with default system browser (if available)
+kk_unit_t kk_draw_pixel(double x, double y, int32_t r, int32_t g, int32_t b, int32_t a, kk_context_t* ctx) {
+    DrawPixelV((Vector2){ (float)x, (float)y }, (Color){ (unsigned char)r, (unsigned char)g, (unsigned char)b, (unsigned char)a });
+    return kk_Unit;
+}
 
-// // Logging system
-// void SetTraceLogLevel(int logLevel);                      // Set the current threshold (minimum) log level
-// void TraceLog(int logLevel, const char *text, ...);       // Show trace log messages (LOG_DEBUG, LOG_INFO, LOG_WARNING, LOG_ERROR...)
-// void SetTraceLogCallback(TraceLogCallback callback);      // Set custom trace log
+kk_unit_t kk_draw_line(double x1, double y1, double x2, double y2, int32_t r, int32_t g, int32_t b, int32_t a, kk_context_t* ctx) {
+    DrawLineV((Vector2){ (float)x1, (float)y1 }, (Vector2){ (float)x2, (float)y2 },
+              (Color){ (unsigned char)r, (unsigned char)g, (unsigned char)b, (unsigned char)a });
+    return kk_Unit;
+}
 
-// // Memory management, using internal allocators
-// void *MemAlloc(unsigned int size);                        // Internal memory allocator
-// void *MemRealloc(void *ptr, unsigned int size);           // Internal memory reallocator
-// void MemFree(void *ptr);                                  // Internal memory free
+kk_unit_t kk_draw_line_ex(double x1, double y1, double x2, double y2, double thick, int32_t r, int32_t g, int32_t b, int32_t a, kk_context_t* ctx) {
+    DrawLineEx((Vector2){ (float)x1, (float)y1 }, (Vector2){ (float)x2, (float)y2 }, (float)thick,
+               (Color){ (unsigned char)r, (unsigned char)g, (unsigned char)b, (unsigned char)a });
+    return kk_Unit;
+}
 
-// // File system management functions
-// unsigned char *LoadFileData(const char *fileName, int *dataSize); // Load file data as byte array (read)
-// void UnloadFileData(unsigned char *data);                     // Unload file data allocated by LoadFileData()
-// bool SaveFileData(const char *fileName, void *data, int dataSize); // Save data to file from byte array (write), returns true on success
-// bool ExportDataAsCode(const unsigned char *data, int dataSize, const char *fileName); // Export data to code (.h), returns true on success
-// char *LoadFileText(const char *fileName);                     // Load text data from file (read), returns a '\0' terminated string
-// void UnloadFileText(char *text);                              // Unload file text data allocated by LoadFileText()
-// bool SaveFileText(const char *fileName, const char *text);    // Save text data to file (write), string must be '\0' terminated, returns true on success
+kk_unit_t kk_draw_circle(double cx, double cy, double radius, int32_t r, int32_t g, int32_t b, int32_t a, kk_context_t* ctx) {
+    DrawCircleV((Vector2){ (float)cx, (float)cy }, (float)radius,
+                (Color){ (unsigned char)r, (unsigned char)g, (unsigned char)b, (unsigned char)a });
+    return kk_Unit;
+}
 
-// // File access custom callbacks
-// // WARNING: Callbacks setup is intended for advanced users
-// void SetLoadFileDataCallback(LoadFileDataCallback callback);  // Set custom file binary data loader
-// void SetSaveFileDataCallback(SaveFileDataCallback callback);  // Set custom file binary data saver
-// void SetLoadFileTextCallback(LoadFileTextCallback callback);  // Set custom file text data loader
-// void SetSaveFileTextCallback(SaveFileTextCallback callback);  // Set custom file text data saver
+kk_unit_t kk_draw_circle_lines(double cx, double cy, double radius, int32_t r, int32_t g, int32_t b, int32_t a, kk_context_t* ctx) {
+    DrawCircleLinesV((Vector2){ (float)cx, (float)cy }, (float)radius,
+                      (Color){ (unsigned char)r, (unsigned char)g, (unsigned char)b, (unsigned char)a });
+    return kk_Unit;
+}
 
-// int FileRename(const char *fileName, const char *fileRename); // Rename file (if exists)
-// int FileRemove(const char *fileName);                         // Remove file (if exists)
-// int FileCopy(const char *srcPath, const char *dstPath);       // Copy file from one path to another, dstPath created if it doesn't exist
-// int FileMove(const char *srcPath, const char *dstPath);       // Move file from one directory to another, dstPath created if it doesn't exist
-// int FileTextReplace(const char *fileName, const char *search, const char *replacement); // Replace text in an existing file
-// int FileTextFindIndex(const char *fileName, const char *search); // Find text in existing file
-// bool FileExists(const char *fileName);                        // Check if file exists
-// bool DirectoryExists(const char *dirPath);                    // Check if a directory path exists
-// bool IsFileExtension(const char *fileName, const char *ext);  // Check file extension (recommended include point: .png, .wav)
-// int GetFileLength(const char *fileName);                      // Get file length in bytes (NOTE: GetFileSize() conflicts with windows.h)
-// long GetFileModTime(const char *fileName);                    // Get file modification time (last write time)
-// const char *GetFileExtension(const char *fileName);           // Get pointer to extension for a filename string (includes dot: '.png')
-// const char *GetFileName(const char *filePath);                // Get pointer to filename for a path string
-// const char *GetFileNameWithoutExt(const char *filePath);      // Get filename string without extension (uses static string)
-// const char *GetDirectoryPath(const char *filePath);           // Get full path for a given fileName with path (uses static string)
-// const char *GetPrevDirectoryPath(const char *dirPath);        // Get previous directory path for a given path (uses static string)
-// const char *GetWorkingDirectory(void);                        // Get current working directory (uses static string)
-// const char *GetApplicationDirectory(void);                    // Get the directory of the running application (uses static string)
-// int MakeDirectory(const char *dirPath);                       // Create directories (including full path requested), returns 0 on success
-// bool ChangeDirectory(const char *dirPath);                    // Change working directory, return true on success
-// bool IsPathFile(const char *path);                            // Check if a given path is a file or a directory
-// bool IsFileNameValid(const char *fileName);                   // Check if fileName is valid for the platform/OS
-// FilePathList LoadDirectoryFiles(const char *dirPath);         // Load directory filepaths, files and directories, no subdirs scan
-// FilePathList LoadDirectoryFilesEx(const char *basePath, const char *filter, bool scanSubdirs); // Load directory filepaths with extension filtering and subdir scan; some filters available: "*.*", "FILES*", "DIRS*"
-// void UnloadDirectoryFiles(FilePathList files);                // Unload filepaths
-// bool IsFileDropped(void);                                     // Check if a file has been dropped into window
-// FilePathList LoadDroppedFiles(void);                          // Load dropped filepaths
-// void UnloadDroppedFiles(FilePathList files);                  // Unload dropped filepaths
-// unsigned int GetDirectoryFileCount(const char *dirPath);      // Get the file count in a directory
-// unsigned int GetDirectoryFileCountEx(const char *basePath, const char *filter, bool scanSubdirs); // Get the file count in a directory with extension filtering and recursive directory scan. Use 'DIR' in the filter string to include directories in the result
+kk_unit_t kk_draw_rectangle(double x, double y, double w, double h, int32_t r, int32_t g, int32_t b, int32_t a, kk_context_t* ctx) {
+    DrawRectangleRec((Rectangle){ (float)x, (float)y, (float)w, (float)h },
+                      (Color){ (unsigned char)r, (unsigned char)g, (unsigned char)b, (unsigned char)a });
+    return kk_Unit;
+}
 
-// // Compression/Encoding functionality
-// unsigned char *CompressData(const unsigned char *data, int dataSize, int *compDataSize);        // Compress data (DEFLATE algorithm), memory must be MemFree()
-// unsigned char *DecompressData(const unsigned char *compData, int compDataSize, int *dataSize);  // Decompress data (DEFLATE algorithm), memory must be MemFree()
-// char *EncodeDataBase64(const unsigned char *data, int dataSize, int *outputSize);               // Encode data to Base64 string (includes NULL terminator), memory must be MemFree()
-// unsigned char *DecodeDataBase64(const char *text, int *outputSize);                             // Decode Base64 string (expected NULL terminated), memory must be MemFree()
-// unsigned int ComputeCRC32(unsigned char *data, int dataSize); // Compute CRC32 hash code
-// unsigned int *ComputeMD5(unsigned char *data, int dataSize);  // Compute MD5 hash code, returns static int[4] (16 bytes)
-// unsigned int *ComputeSHA1(unsigned char *data, int dataSize); // Compute SHA1 hash code, returns static int[5] (20 bytes)
-// unsigned int *ComputeSHA256(unsigned char *data, int dataSize); // Compute SHA256 hash code, returns static int[8] (32 bytes)
+kk_unit_t kk_draw_rectangle_lines(double x, double y, double w, double h, int32_t r, int32_t g, int32_t b, int32_t a, kk_context_t* ctx) {
+    DrawRectangleLinesEx((Rectangle){ (float)x, (float)y, (float)w, (float)h }, 1.0f,
+                          (Color){ (unsigned char)r, (unsigned char)g, (unsigned char)b, (unsigned char)a });
+    return kk_Unit;
+}
 
-// // Automation events functionality
-// AutomationEventList LoadAutomationEventList(const char *fileName); // Load automation events list from file, NULL for empty list, capacity = MAX_AUTOMATION_EVENTS
-// void UnloadAutomationEventList(AutomationEventList list);   // Unload automation events list from file
-// bool ExportAutomationEventList(AutomationEventList list, const char *fileName); // Export automation events list as text file
-// void SetAutomationEventList(AutomationEventList *list);     // Set automation event list to record to
-// void SetAutomationEventBaseFrame(int frame);                // Set automation event internal base frame to start recording
-// void StartAutomationEventRecording(void);                   // Start recording automation events (AutomationEventList must be set)
-// void StopAutomationEventRecording(void);                    // Stop recording automation events
-// void PlayAutomationEvent(AutomationEvent event);            // Play a recorded automation event
+// kk_unit_t kk_draw_rectangle_rounded(double x, double y, double w, double h, double roundness, int32_t segments, int32_t r, int32_t g, int32_t b, int32_t a, kk_context_t* ctx) {
+//     DrawRectangleRounded((Rectangle){ (float)x, (float)y, (float)w, (float)h }, (float)roundness, segments,
+//                           (Color){ (unsigned char)r, (unsigned char)g, (unsigned char)b, (unsigned char)a });
+//     return kk_Unit;
+// }
 
-// //------------------------------------------------------------------------------------
-// // Input Handling Functions (Module: core)
-// //------------------------------------------------------------------------------------
+// kk_unit_t kk_draw_triangle(double x1, double y1, double x2, double y2, double x3, double y3, int32_t r, int32_t g, int32_t b, int32_t a, kk_context_t* ctx) {
+//     DrawTriangle((Vector2){ (float)x1, (float)y1 }, (Vector2){ (float)x2, (float)y2 }, (Vector2){ (float)x3, (float)y3 },
+//                  (Color){ (unsigned char)r, (unsigned char)g, (unsigned char)b, (unsigned char)a });
+//     return kk_Unit;
+// }
 
-// // Input-related functions: keyboard
-// bool IsKeyPressed(int key);                             // Check if a key has been pressed once
-// bool IsKeyPressedRepeat(int key);                       // Check if a key has been pressed again
-// bool IsKeyDown(int key);                                // Check if a key is being pressed
-// bool IsKeyReleased(int key);                            // Check if a key has been released once
-// bool IsKeyUp(int key);                                  // Check if a key is NOT being pressed
-// int GetKeyPressed(void);                                // Get key pressed (keycode), call it multiple times for keys queued, returns 0 when the queue is empty
-// int GetCharPressed(void);                               // Get char pressed (unicode), call it multiple times for chars queued, returns 0 when the queue is empty
-// const char *GetKeyName(int key);                        // Get name of a QWERTY key on the current keyboard layout (eg returns string 'q' for KEY_A on an AZERTY keyboard)
-// void SetExitKey(int key);                               // Set a custom key to exit program (default is ESC)
+kk_unit_t kk_draw_poly(double cx, double cy, int32_t sides, double radius, double rotation, int32_t r, int32_t g, int32_t b, int32_t a, kk_context_t* ctx) {
+    DrawPoly((Vector2){ (float)cx, (float)cy }, sides, (float)radius, (float)rotation,
+             (Color){ (unsigned char)r, (unsigned char)g, (unsigned char)b, (unsigned char)a });
+    return kk_Unit;
+}
 
-// // Input-related functions: gamepads
-// bool IsGamepadAvailable(int gamepad);                   // Check if a gamepad is available
-// const char *GetGamepadName(int gamepad);                // Get gamepad internal name id
-// bool IsGamepadButtonPressed(int gamepad, int button);   // Check if a gamepad button has been pressed once
-// bool IsGamepadButtonDown(int gamepad, int button);      // Check if a gamepad button is being pressed
-// bool IsGamepadButtonReleased(int gamepad, int button);  // Check if a gamepad button has been released once
-// bool IsGamepadButtonUp(int gamepad, int button);        // Check if a gamepad button is NOT being pressed
-// int GetGamepadButtonPressed(void);                      // Get the last gamepad button pressed
-// int GetGamepadAxisCount(int gamepad);                   // Get axis count for a gamepad
-// float GetGamepadAxisMovement(int gamepad, int axis);    // Get movement value for a gamepad axis
-// int SetGamepadMappings(const char *mappings);           // Set internal gamepad mappings (SDL_GameControllerDB)
-// void SetGamepadVibration(int gamepad, float leftMotor, float rightMotor, float duration); // Set gamepad vibration for both motors (duration in seconds)
+bool kk_check_collision_recs(double x1, double y1, double w1, double h1, double x2, double y2, double w2, double h2, kk_context_t* ctx) {
+    return CheckCollisionRecs((Rectangle){ (float)x1, (float)y1, (float)w1, (float)h1 },
+                               (Rectangle){ (float)x2, (float)y2, (float)w2, (float)h2 });
+}
 
-// // Input-related functions: mouse
-// bool IsMouseButtonPressed(int button);                  // Check if a mouse button has been pressed once
-// bool IsMouseButtonDown(int button);                     // Check if a mouse button is being pressed
-// bool IsMouseButtonReleased(int button);                 // Check if a mouse button has been released once
-// bool IsMouseButtonUp(int button);                       // Check if a mouse button is NOT being pressed
-// int GetMouseX(void);                                    // Get mouse position X
-// int GetMouseY(void);                                    // Get mouse position Y
-// Vector2 GetMousePosition(void);                         // Get mouse position XY
-// Vector2 GetMouseDelta(void);                            // Get mouse delta between frames
-// void SetMousePosition(int x, int y);                    // Set mouse position XY
-// void SetMouseOffset(int offsetX, int offsetY);          // Set mouse offset
-// void SetMouseScale(float scaleX, float scaleY);         // Set mouse scaling
-// float GetMouseWheelMove(void);                          // Get mouse wheel movement for X or Y, whichever is larger
-// Vector2 GetMouseWheelMoveV(void);                       // Get mouse wheel movement for both X and Y
-// void SetMouseCursor(int cursor);                        // Set mouse cursor
+bool kk_check_collision_circles(double x1, double y1, double r1, double x2, double y2, double r2, kk_context_t* ctx) {
+    return CheckCollisionCircles((Vector2){ (float)x1, (float)y1 }, (float)r1, (Vector2){ (float)x2, (float)y2 }, (float)r2);
+}
 
-// // Input-related functions: touch
-// int GetTouchX(void);                                    // Get touch position X for touch point 0 (relative to screen size)
-// int GetTouchY(void);                                    // Get touch position Y for touch point 0 (relative to screen size)
-// Vector2 GetTouchPosition(int index);                    // Get touch position XY for a touch point index (relative to screen size)
-// int GetTouchPointId(int index);                         // Get touch point identifier for given index
-// int GetTouchPointCount(void);                           // Get number of touch points
+bool kk_check_collision_point_rec(double px, double py, double x, double y, double w, double h, kk_context_t* ctx) {
+    return CheckCollisionPointRec((Vector2){ (float)px, (float)py }, (Rectangle){ (float)x, (float)y, (float)w, (float)h });
+}
 
-// //------------------------------------------------------------------------------------
-// // Gestures and Touch Handling Functions (Module: rgestures)
-// //------------------------------------------------------------------------------------
-// void SetGesturesEnabled(unsigned int flags);            // Enable a set of gestures using flags
-// bool IsGestureDetected(unsigned int gesture);           // Check if a gesture have been detected
-// int GetGestureDetected(void);                           // Get latest detected gesture
-// float GetGestureHoldDuration(void);                     // Get gesture hold time in seconds
-// Vector2 GetGestureDragVector(void);                     // Get gesture drag vector
-// float GetGestureDragAngle(void);                        // Get gesture drag angle
-// Vector2 GetGesturePinchVector(void);                    // Get gesture pinch delta
-// float GetGesturePinchAngle(void);                       // Get gesture pinch angle
+// ------------------------------------------------------------------
+// Text
+// ------------------------------------------------------------------
 
-// //------------------------------------------------------------------------------------
-// // Camera System Functions (Module: rcamera)
-// //------------------------------------------------------------------------------------
-// void UpdateCamera(Camera *camera, int mode);            // Update camera position for selected mode
-// void UpdateCameraPro(Camera *camera, Vector3 movement, Vector3 rotation, float zoom); // Update camera movement/rotation
+kk_unit_t kk_draw_text(kk_string_t text, int32_t x, int32_t y, int32_t fontSize, int32_t r, int32_t g, int32_t b, int32_t a, kk_context_t* ctx) {
+    const char* ctext = kk_string_cbuf_borrow(text, NULL, ctx);
+    DrawText(ctext, x, y, fontSize, (Color){ (unsigned char)r, (unsigned char)g, (unsigned char)b, (unsigned char)a });
+    kk_string_drop(text, ctx);
+    return kk_Unit;
+}
 
+kk_unit_t kk_draw_fps(int32_t x, int32_t y, kk_context_t* ctx) {
+    DrawFPS(x, y);
+    return kk_Unit;
+}
+
+int32_t kk_measure_text(kk_string_t text, int32_t fontSize, kk_context_t* ctx) {
+    const char* ctext = kk_string_cbuf_borrow(text, NULL, ctx);
+    int32_t result = MeasureText(ctext, fontSize);
+    kk_string_drop(text, ctx);
+    return result;
+}
+
+// ------------------------------------------------------------------
+// Input: keyboard
+// ------------------------------------------------------------------
+
+bool kk_is_key_pressed(int32_t key, kk_context_t* ctx)  { return IsKeyPressed(key); }
+bool kk_is_key_down(int32_t key, kk_context_t* ctx)     { return IsKeyDown(key); }
+bool kk_is_key_released(int32_t key, kk_context_t* ctx) { return IsKeyReleased(key); }
+bool kk_is_key_up(int32_t key, kk_context_t* ctx)       { return IsKeyUp(key); }
+int32_t kk_get_key_pressed(kk_context_t* ctx)           { return GetKeyPressed(); }
+
+// ------------------------------------------------------------------
+// Input: mouse
+// ------------------------------------------------------------------
+
+bool kk_is_mouse_button_pressed(int32_t button, kk_context_t* ctx)  { return IsMouseButtonPressed(button); }
+bool kk_is_mouse_button_down(int32_t button, kk_context_t* ctx)     { return IsMouseButtonDown(button); }
+bool kk_is_mouse_button_released(int32_t button, kk_context_t* ctx) { return IsMouseButtonReleased(button); }
+bool kk_is_mouse_button_up(int32_t button, kk_context_t* ctx)       { return IsMouseButtonUp(button); }
+
+double kk_get_mouse_x(kk_context_t* ctx) { return (double)GetMouseX(); }
+double kk_get_mouse_y(kk_context_t* ctx) { return (double)GetMouseY(); }
+double kk_get_mouse_wheel_move(kk_context_t* ctx) { return (double)GetMouseWheelMove(); }
