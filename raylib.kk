@@ -96,34 +96,26 @@ extern close-window() : raylib-io ()
 extern window-should-close() : raylib-io bool
   c "kk_window_should_close"
 
-extern xis-window-ready() : raylib-io bool
+extern is-window-ready() : raylib-io bool
   c "kk_is_window_ready"
-pub fun is-window-ready() : raylib-io bool { xis-window-ready() }
 
-extern xis-window-fullscreen() : raylib-io bool
+extern is-window-fullscreen() : raylib-io bool
   c "kk_is_window_fullscreen"
-pub fun is-window-fullscreen() : raylib-io bool { xis-window-fullscreen() }
 
-extern xtoggle-fullscreen() : raylib-io ()
+extern toggle-fullscreen() : raylib-io ()
   c "kk_toggle_fullscreen"
-pub fun toggle-fullscreen() : raylib-io () { xtoggle-fullscreen() }
 
-extern xset-window-title(title: string) : raylib-io ()
+extern set-window-title(title: string) : raylib-io ()
   c "kk_set_window_title"
-pub fun set-window-title(title: string) : raylib-io () { xset-window-title(title) }
 
-extern xset-window-size(width: int32, height: int32) : raylib-io ()
+extern set-window-size(width: int32, height: int32) : raylib-io ()
   c "kk_set_window_size"
-pub fun set-window-size(width: int32, height: int32) : raylib-io ()
-  xset-window-size(width, height)
 
-extern xget-screen-width() : raylib-io int32
+extern get-screen-width() : raylib-io int32
   c "kk_get_screen_width"
-pub fun get-screen-width() : raylib-io int32 { xget-screen-width() }
 
-extern xget-screen-height() : raylib-io int32
+extern get-screen-height() : raylib-io int32
   c "kk_get_screen_height"
-pub fun get-screen-height() : raylib-io int32 { xget-screen-height() }
 
 // ----------------------------------------------------------------------
 // Drawing
@@ -135,15 +127,11 @@ extern begin-drawing() : raylib-io ()
 extern end-drawing() : raylib-io ()
   c "kk_end_drawing"
 
-extern xclear-background(r: int32, g: int32, b: int32, a: int32) : raylib-io ()
+extern clear-background(color: rgba) : raylib-io ()
   c "kk_clear_background"
-pub fun clear-background(color: rgba) : raylib-io ()
-  xclear-background(color.r, color.g, color.b, color.a)
 
-extern xbegin-scissor-mode(x: int32, y: int32, width: int32, height: int32) : raylib-io ()
+extern begin-scissor-mode(x: int32, y: int32, width: int32, height: int32) : raylib-io ()
   c "kk_begin_scissor_mode"
-pub fun begin-scissor-mode(x: int32, y: int32, width: int32, height: int32) : raylib-io ()
-  xbegin-scissor-mode(x, y, width, height)
 
 extern end-scissor-mode() : raylib-io ()
   c "kk_end_scissor_mode"
@@ -155,21 +143,20 @@ extern end-scissor-mode() : raylib-io ()
 extern set-target-fps(fps: int32) : raylib-io ()
   c "kk_set_target_fps"
 
-extern xget-frame-time() : raylib-io float64
+extern get-frame-time() : ndet float64
   c "kk_get_frame_time"
-pub fun get-frame-time() : raylib-io float64 { xget-frame-time() }
 
-extern xget-time() : raylib-io float64
+extern get-time() : ndet float64
   c "kk_get_time"
-pub fun get-time() : raylib-io float64 { xget-time() }
 
-extern xget-fps() : raylib-io int32
+extern get-fps() : ndet int32
   c "kk_get_fps"
-pub fun get-fps() : raylib-io int32 { xget-fps() }
 
 // ----------------------------------------------------------------------
 // Shapes (2D)
 // ----------------------------------------------------------------------
+
+// TODO cleanup extern functions
 
 extern xdraw-pixel(x: float64, y: float64, r: int32, g: int32, b: int32, a: int32) : raylib-io ()
   c "kk_draw_pixel"
@@ -309,7 +296,7 @@ fun main() {
   init-window(800.i32, 450.i32, "raylib + koka")
   set-target-fps(60.i32)
   var x := 0.0
-  while (fn() !(window-should-close())) {
+  while (fn() !(window-should-close()))
     val dt = get-frame-time()
     x := x + dt*64.0
     begin-drawing()
@@ -320,6 +307,6 @@ fun main() {
     draw-fps(10.i32, 10.i32)
 
     end-drawing()
-  }
+  
   close-window()
 }

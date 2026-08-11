@@ -8,8 +8,8 @@
 // ------------------------------------------------------------------
 
 kk_unit_t kk_init_window(int32_t width, int32_t height, kk_string_t title, kk_context_t* ctx) {
-    kk_ssize_t len = kk_string_len(title, ctx);
-    const char* ctitle = kk_string_cbuf_borrow(title, &len, ctx);
+    // kk_ssize_t len = kk_string_len(title, ctx); // TODO not needed? ok
+    const char* ctitle = kk_string_cbuf_borrow(title, NULL, ctx);
     InitWindow(width, height, ctitle);
     kk_string_drop(title, ctx);
     return kk_Unit;
@@ -71,8 +71,9 @@ kk_unit_t kk_end_drawing(kk_context_t* ctx) {
     return kk_Unit;
 }
 
-kk_unit_t kk_clear_background(int32_t r, int32_t g, int32_t b, int32_t a, kk_context_t* ctx) {
-    ClearBackground((Color){ (unsigned char)r, (unsigned char)g, (unsigned char)b, (unsigned char)a });
+kk_unit_t kk_clear_background(kk_raylib__rgba color, kk_context_t* ctx) {
+    struct kk_raylib_Rgba* color_ = kk_raylib__as_Rgba(color, ctx);
+    ClearBackground((Color){ (unsigned char)color_->r, (unsigned char)color_->g, (unsigned char)color_->b, (unsigned char)color_->a });
     return kk_Unit;
 }
 
