@@ -1,6 +1,8 @@
 // raylib_koka.c
 #include <raylib.h>
 
+// TODO kk_string_cbuf_borrow needs the string length at all places, not NULL
+
 // ------------------------------------------------------------------
 // Window management
 // ------------------------------------------------------------------
@@ -129,6 +131,15 @@ kk_unit_t kk_draw_line_ex(double x1, double y1, double x2, double y2, double thi
 kk_unit_t kk_draw_circle(double cx, double cy, double radius, int32_t r, int32_t g, int32_t b, int32_t a, kk_context_t* ctx) {
     DrawCircleV((Vector2){ (float)cx, (float)cy }, (float)radius,
                 (Color){ (unsigned char)r, (unsigned char)g, (unsigned char)b, (unsigned char)a });
+    return kk_Unit;
+}
+
+// Yes this is how you handle structs!
+kk_unit_t kk_draw_circle_2(kk_raylib__vector2 center, double radius, kk_raylib__rgba color, kk_context_t* ctx) {
+    struct kk_raylib_Vector2* center_ = kk_raylib__as_Vector2(center, ctx);
+    struct kk_raylib_Rgba* color_ = kk_raylib__as_Rgba(color, ctx);
+    DrawCircleV((Vector2){ (float)center_->x, (float)center_->y }, (float)radius,
+                (Color){ (unsigned char)color_->r, (unsigned char)color_->g, (unsigned char)color_->b, (unsigned char)color_->a });
     return kk_Unit;
 }
 

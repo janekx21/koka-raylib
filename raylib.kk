@@ -6,6 +6,7 @@
 module raylib
 
 import std/num/int32
+import std/num/float64
 
 extern import
   c file "raylib_koka.c"
@@ -24,10 +25,13 @@ pub alias raylib-io = <ui, st<global>, ndet>
 // These exist only on the Koka side -- they are never passed across the
 // FFI boundary as structs. The C shim always takes/returns flat scalars.
 
+// TODO use int type instead of int32, easier to use
+
 pub struct vector2
   x : float64
   y : float64
 
+// TODO rename to color
 pub struct rgba
   r : int32
   g : int32
@@ -187,6 +191,9 @@ extern xdraw-circle(cx: float64, cy: float64, radius: float64, r: int32, g: int3
 pub fun draw-circle(center: vector2, radius: float64, color: rgba) : raylib-io ()
   xdraw-circle(center.x, center.y, radius, color.r, color.g, color.b, color.a)
 
+extern draw-circle2(center: vector2, radius: float64, color: rgba) : raylib-io ()
+  c "kk_draw_circle_2"
+
 extern xdraw-circle-lines(cx: float64, cy: float64, radius: float64, r: int32, g: int32, b: int32, a: int32) : raylib-io ()
   c "kk_draw_circle_lines"
 pub fun draw-circle-lines(center: vector2, radius: float64, color: rgba) : raylib-io ()
@@ -297,18 +304,21 @@ extern xget-mouse-wheel-move() : raylib-io float64
 pub fun get-mouse-wheel-move() : raylib-io float64 { xget-mouse-wheel-move() }
 
 
-
 // This is just for testing out some stuff
 fun main() {
   init-window(800.i32, 450.i32, "raylib + koka")
   set-target-fps(60.i32)
+  var x := 0.0
   while (fn() !(window-should-close())) {
+    val dt = get-frame-time()
+    x := x + dt*64.0
     begin-drawing()
     clear-background(raywhite)
-    draw-circle(Vector2(400.0, 225.0), 50.0, red)
+    draw-circle2(Vector2(x, 225.0), 50.0, red)
     draw-rectangle(Rect(20.0, 20.0, 200.0, 80.0), sky-blue)
     draw-text("Hello from Koka!", 20.i32, 120.i32, 20.i32, black)
     draw-fps(10.i32, 10.i32)
+
     end-drawing()
   }
   close-window()
