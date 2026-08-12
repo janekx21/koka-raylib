@@ -87,69 +87,69 @@ pub val mouse-button-middle : int32 = 2.i32
 // Window management
 // ----------------------------------------------------------------------
 
-extern init-window(width: int32, height: int32, title: string) : raylib-io ()
+pub extern init-window(width: int32, height: int32, title: string) : raylib-io ()
   c "kk_init_window"
 
-extern close-window() : raylib-io ()
+pub extern close-window() : raylib-io ()
   c "kk_close_window"
 
-extern window-should-close() : raylib-io bool
+pub extern window-should-close() : raylib-io bool
   c "kk_window_should_close"
 
-extern is-window-ready() : raylib-io bool
+pub extern is-window-ready() : raylib-io bool
   c "kk_is_window_ready"
 
-extern is-window-fullscreen() : raylib-io bool
+pub extern is-window-fullscreen() : raylib-io bool
   c "kk_is_window_fullscreen"
 
-extern toggle-fullscreen() : raylib-io ()
+pub extern toggle-fullscreen() : raylib-io ()
   c "kk_toggle_fullscreen"
 
-extern set-window-title(title: string) : raylib-io ()
+pub extern set-window-title(title: string) : raylib-io ()
   c "kk_set_window_title"
 
-extern set-window-size(width: int32, height: int32) : raylib-io ()
+pub extern set-window-size(width: int32, height: int32) : raylib-io ()
   c "kk_set_window_size"
 
-extern get-screen-width() : raylib-io int32
+pub extern get-screen-width() : raylib-io int32
   c "kk_get_screen_width"
 
-extern get-screen-height() : raylib-io int32
+pub extern get-screen-height() : raylib-io int32
   c "kk_get_screen_height"
 
 // ----------------------------------------------------------------------
 // Drawing
 // ----------------------------------------------------------------------
 
-extern begin-drawing() : raylib-io ()
+pub extern begin-drawing() : raylib-io ()
   c "kk_begin_drawing"
 
-extern end-drawing() : raylib-io ()
+pub extern end-drawing() : raylib-io ()
   c "kk_end_drawing"
 
-extern clear-background(color: rgba) : raylib-io ()
+pub extern clear-background(color: rgba) : raylib-io ()
   c "kk_clear_background"
 
-extern begin-scissor-mode(x: int32, y: int32, width: int32, height: int32) : raylib-io ()
+pub extern begin-scissor-mode(x: int32, y: int32, width: int32, height: int32) : raylib-io ()
   c "kk_begin_scissor_mode"
 
-extern end-scissor-mode() : raylib-io ()
+pub extern end-scissor-mode() : raylib-io ()
   c "kk_end_scissor_mode"
 
 // ----------------------------------------------------------------------
 // Timing
 // ----------------------------------------------------------------------
 
-extern set-target-fps(fps: int32) : raylib-io ()
+pub extern set-target-fps(fps: int32) : raylib-io ()
   c "kk_set_target_fps"
 
-extern get-frame-time() : ndet float64
+pub extern get-frame-time() : ndet float64
   c "kk_get_frame_time"
 
-extern get-time() : ndet float64
+pub extern get-time() : ndet float64
   c "kk_get_time"
 
-extern get-fps() : ndet int32
+pub extern get-fps() : ndet int32
   c "kk_get_fps"
 
 // ----------------------------------------------------------------------
@@ -158,40 +158,40 @@ extern get-fps() : ndet int32
 
 // TODO cleanup extern functions
 
-extern xdraw-pixel(x: float64, y: float64, r: int32, g: int32, b: int32, a: int32) : raylib-io ()
+pub extern xdraw-pixel(x: float64, y: float64, r: int32, g: int32, b: int32, a: int32) : raylib-io ()
   c "kk_draw_pixel"
 pub fun draw-pixel(pos: vector2, color: rgba) : raylib-io ()
   xdraw-pixel(pos.x, pos.y, color.r, color.g, color.b, color.a)
 
-extern xdraw-line(x1: float64, y1: float64, x2: float64, y2: float64, r: int32, g: int32, b: int32, a: int32) : raylib-io ()
+pub extern xdraw-line(x1: float64, y1: float64, x2: float64, y2: float64, r: int32, g: int32, b: int32, a: int32) : raylib-io ()
   c "kk_draw_line"
 pub fun draw-line(start: vector2, end: vector2, color: rgba) : raylib-io ()
   xdraw-line(start.x, start.y, end.x, end.y, color.r, color.g, color.b, color.a)
 
-extern xdraw-line-ex(x1: float64, y1: float64, x2: float64, y2: float64, thick: float64, r: int32, g: int32, b: int32, a: int32) : raylib-io ()
+pub extern xdraw-line-ex(x1: float64, y1: float64, x2: float64, y2: float64, thick: float64, r: int32, g: int32, b: int32, a: int32) : raylib-io ()
   c "kk_draw_line_ex"
 pub fun draw-line-ex(start: vector2, end: vector2, thick: float64, color: rgba) : raylib-io ()
   xdraw-line-ex(start.x, start.y, end.x, end.y, thick, color.r, color.g, color.b, color.a)
 
-extern xdraw-circle(cx: float64, cy: float64, radius: float64, r: int32, g: int32, b: int32, a: int32) : raylib-io ()
+pub extern xdraw-circle(cx: float64, cy: float64, radius: float64, r: int32, g: int32, b: int32, a: int32) : raylib-io ()
   c "kk_draw_circle"
 pub fun draw-circle(center: vector2, radius: float64, color: rgba) : raylib-io ()
   xdraw-circle(center.x, center.y, radius, color.r, color.g, color.b, color.a)
 
-extern draw-circle2(center: vector2, radius: float64, color: rgba) : raylib-io ()
+pub extern draw-circle2(center: vector2, radius: float64, color: rgba) : raylib-io ()
   c "kk_draw_circle_2"
 
-extern xdraw-circle-lines(cx: float64, cy: float64, radius: float64, r: int32, g: int32, b: int32, a: int32) : raylib-io ()
+pub extern xdraw-circle-lines(cx: float64, cy: float64, radius: float64, r: int32, g: int32, b: int32, a: int32) : raylib-io ()
   c "kk_draw_circle_lines"
 pub fun draw-circle-lines(center: vector2, radius: float64, color: rgba) : raylib-io ()
   xdraw-circle-lines(center.x, center.y, radius, color.r, color.g, color.b, color.a)
 
-extern xdraw-rectangle(x: float64, y: float64, w: float64, h: float64, r: int32, g: int32, b: int32, a: int32) : raylib-io ()
+pub extern xdraw-rectangle(x: float64, y: float64, w: float64, h: float64, r: int32, g: int32, b: int32, a: int32) : raylib-io ()
   c "kk_draw_rectangle"
 pub fun draw-rectangle(rectangle: rect, color: rgba) : raylib-io ()
   xdraw-rectangle(rectangle.x, rectangle.y, rectangle.w, rectangle.h, color.r, color.g, color.b, color.a)
 
-extern xdraw-rectangle-lines(x: float64, y: float64, w: float64, h: float64, r: int32, g: int32, b: int32, a: int32) : raylib-io ()
+pub extern xdraw-rectangle-lines(x: float64, y: float64, w: float64, h: float64, r: int32, g: int32, b: int32, a: int32) : raylib-io ()
   c "kk_draw_rectangle_lines"
 pub fun draw-rectangle-lines(rectangle: rect, color: rgba) : raylib-io ()
   xdraw-rectangle-lines(rectangle.x, rectangle.y, rectangle.w, rectangle.h, color.r, color.g, color.b, color.a)
@@ -207,22 +207,22 @@ pub fun draw-rectangle-lines(rectangle: rect, color: rgba) : raylib-io ()
 // pub fun draw-triangle(v1: vector2, v2: vector2, v3: vector2, color: rgba) : raylib-io ()
 //   xdraw-triangle(v1.x, v1.y, v2.x, v2.y, v3.x, v3.y, color.r, color.g, color.b, color.a)
 
-extern xdraw-poly(cx: float64, cy: float64, sides: int32, radius: float64, rotation: float64, r: int32, g: int32, b: int32, a: int32) : raylib-io ()
+pub extern xdraw-poly(cx: float64, cy: float64, sides: int32, radius: float64, rotation: float64, r: int32, g: int32, b: int32, a: int32) : raylib-io ()
   c "kk_draw_poly"
 pub fun draw-poly(center: vector2, sides: int32, radius: float64, rotation: float64, color: rgba) : raylib-io ()
   xdraw-poly(center.x, center.y, sides, radius, rotation, color.r, color.g, color.b, color.a)
 
-extern xcheck-collision-recs(x1: float64, y1: float64, w1: float64, h1: float64, x2: float64, y2: float64, w2: float64, h2: float64) : raylib-io bool
+pub extern xcheck-collision-recs(x1: float64, y1: float64, w1: float64, h1: float64, x2: float64, y2: float64, w2: float64, h2: float64) : raylib-io bool
   c "kk_check_collision_recs"
 pub fun check-collision-recs(a: rect, b: rect) : raylib-io bool
   xcheck-collision-recs(a.x, a.y, a.w, a.h, b.x, b.y, b.w, b.h)
 
-extern xcheck-collision-circles(x1: float64, y1: float64, r1: float64, x2: float64, y2: float64, r2: float64) : raylib-io bool
+pub extern xcheck-collision-circles(x1: float64, y1: float64, r1: float64, x2: float64, y2: float64, r2: float64) : raylib-io bool
   c "kk_check_collision_circles"
 pub fun check-collision-circles(center1: vector2, radius1: float64, center2: vector2, radius2: float64) : raylib-io bool
   xcheck-collision-circles(center1.x, center1.y, radius1, center2.x, center2.y, radius2)
 
-extern xcheck-collision-point-rec(px: float64, py: float64, x: float64, y: float64, w: float64, h: float64) : raylib-io bool
+pub extern xcheck-collision-point-rec(px: float64, py: float64, x: float64, y: float64, w: float64, h: float64) : raylib-io bool
   c "kk_check_collision_point_rec"
 pub fun check-collision-point-rec(point: vector2, rectangle: rect) : raylib-io bool
   xcheck-collision-point-rec(point.x, point.y, rectangle.x, rectangle.y, rectangle.w, rectangle.h)
@@ -231,62 +231,62 @@ pub fun check-collision-point-rec(point: vector2, rectangle: rect) : raylib-io b
 // Text (default font only -- custom font loading is a follow-up)
 // ----------------------------------------------------------------------
 
-extern xdraw-text(text: string, x: int32, y: int32, font-size: int32, r: int32, g: int32, b: int32, a: int32) : raylib-io ()
+pub extern xdraw-text(text: string, x: int32, y: int32, font-size: int32, r: int32, g: int32, b: int32, a: int32) : raylib-io ()
   c "kk_draw_text"
 pub fun draw-text(text: string, x: int32, y: int32, font-size: int32, color: rgba) : raylib-io ()
   xdraw-text(text, x, y, font-size, color.r, color.g, color.b, color.a)
 
-extern draw-fps(x: int32, y: int32) : raylib-io ()
+pub extern draw-fps(x: int32, y: int32) : raylib-io ()
   c "kk_draw_fps"
 
-extern measure-text(text: string, font-size: int32) : raylib-io int32
+pub extern measure-text(text: string, font-size: int32) : raylib-io int32
   c "kk_measure_text"
 
 // ----------------------------------------------------------------------
 // Input: keyboard
 // ----------------------------------------------------------------------
 
-extern is-key-pressed(key: int32) : raylib-io bool
+pub extern is-key-pressed(key: int32) : raylib-io bool
   c "kk_is_key_pressed"
 
-extern is-key-down(key: int32) : raylib-io bool
+pub extern is-key-down(key: int32) : raylib-io bool
   c "kk_is_key_down"
 
-extern is-key-released(key: int32) : raylib-io bool
+pub extern is-key-released(key: int32) : raylib-io bool
   c "kk_is_key_released"
 
-extern is-key-up(key: int32) : raylib-io bool
+pub extern is-key-up(key: int32) : raylib-io bool
   c "kk_is_key_up"
 
-extern get-key-pressed() : raylib-io int32
+pub extern get-key-pressed() : raylib-io int32
   c "kk_get_key_pressed"
 
 // ----------------------------------------------------------------------
 // Input: mouse
 // ----------------------------------------------------------------------
 
-extern is-mouse-button-pressed(button: int32) : raylib-io bool
+pub extern is-mouse-button-pressed(button: int32) : raylib-io bool
   c "kk_is_mouse_button_pressed"
 
-extern is-mouse-button-down(button: int32) : raylib-io bool
+pub extern is-mouse-button-down(button: int32) : raylib-io bool
   c "kk_is_mouse_button_down"
 
-extern is-mouse-button-released(button: int32) : raylib-io bool
+pub extern is-mouse-button-released(button: int32) : raylib-io bool
   c "kk_is_mouse_button_released"
 
-extern is-mouse-button-up(button: int32) : raylib-io bool
+pub extern is-mouse-button-up(button: int32) : raylib-io bool
   c "kk_is_mouse_button_up"
 
-extern xget-mouse-x() : raylib-io float64
+pub extern xget-mouse-x() : raylib-io float64
   c "kk_get_mouse_x"
 
-extern xget-mouse-y() : raylib-io float64
+pub extern xget-mouse-y() : raylib-io float64
   c "kk_get_mouse_y"
 
 pub fun get-mouse-position() : raylib-io vector2
   Vector2(xget-mouse-x(), xget-mouse-y())
 
-extern xget-mouse-wheel-move() : raylib-io float64
+pub extern xget-mouse-wheel-move() : raylib-io float64
   c "kk_get_mouse_wheel_move"
 pub fun get-mouse-wheel-move() : raylib-io float64 { xget-mouse-wheel-move() }
 
