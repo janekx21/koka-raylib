@@ -31,6 +31,26 @@ pub struct vector2
   x : float64
   y : float64
 
+pub fun show(a : vector2) : string
+  "<" ++ show-fixed(a.x, 2) ++ "," ++ show-fixed(a.y, 2) ++ ">"
+
+
+pub fun (+)(a : vector2, b : vector2) : vector2
+  Vector2(a.x + b.x, a.y + b.y)
+
+pub fun (*)(a : vector2, b : float64) : vector2
+  Vector2(a.x * b, a.y * b)
+
+pub val right = Vector2(1.0, 0.0)
+pub val left = Vector2(-1.0, 0.0)
+pub val down = Vector2(0.0, 1.0)
+pub val up = Vector2(0.0, -1.0)
+pub val zero = Vector2(0.0, 0.0)
+pub val one = Vector2(1.0, 1.0)
+
+pub fun len(a : vector2) : float64
+  sqrt(a.x * a.x + a.y * a.y)
+
 // TODO rename to color
 pub struct rgba
   r : int32
