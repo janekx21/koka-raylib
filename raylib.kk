@@ -172,6 +172,56 @@ pub extern get-time() : ndet float64
 pub extern get-fps() : ndet int32
   c "kk_get_fps"
 
+
+// ----------------------------------------------------------------------
+// Input: keyboard
+// ----------------------------------------------------------------------
+
+pub extern is-key-pressed(key: int32) : raylib-io bool
+  c "kk_is_key_pressed"
+
+pub extern is-key-down(key: int32) : raylib-io bool
+  c "kk_is_key_down"
+
+pub extern is-key-released(key: int32) : raylib-io bool
+  c "kk_is_key_released"
+
+pub extern is-key-up(key: int32) : raylib-io bool
+  c "kk_is_key_up"
+
+pub extern get-key-pressed() : raylib-io int32
+  c "kk_get_key_pressed"
+
+// ----------------------------------------------------------------------
+// Input: mouse
+// ----------------------------------------------------------------------
+
+pub extern is-mouse-button-pressed(button: int32) : raylib-io bool
+  c "kk_is_mouse_button_pressed"
+
+pub extern is-mouse-button-down(button: int32) : raylib-io bool
+  c "kk_is_mouse_button_down"
+
+pub extern is-mouse-button-released(button: int32) : raylib-io bool
+  c "kk_is_mouse_button_released"
+
+pub extern is-mouse-button-up(button: int32) : raylib-io bool
+  c "kk_is_mouse_button_up"
+
+pub extern xget-mouse-x() : raylib-io float64
+  c "kk_get_mouse_x"
+
+pub extern xget-mouse-y() : raylib-io float64
+  c "kk_get_mouse_y"
+
+pub fun get-mouse-position() : raylib-io vector2
+  Vector2(xget-mouse-x(), xget-mouse-y())
+
+pub extern xget-mouse-wheel-move() : raylib-io float64
+  c "kk_get_mouse_wheel_move"
+pub fun get-mouse-wheel-move() : raylib-io float64 { xget-mouse-wheel-move() }
+
+
 // ----------------------------------------------------------------------
 // Shapes (2D)
 // ----------------------------------------------------------------------
@@ -261,55 +311,6 @@ pub extern draw-fps(x: int32, y: int32) : raylib-io ()
 
 pub extern measure-text(text: string, font-size: int32) : raylib-io int32
   c "kk_measure_text"
-
-// ----------------------------------------------------------------------
-// Input: keyboard
-// ----------------------------------------------------------------------
-
-pub extern is-key-pressed(key: int32) : raylib-io bool
-  c "kk_is_key_pressed"
-
-pub extern is-key-down(key: int32) : raylib-io bool
-  c "kk_is_key_down"
-
-pub extern is-key-released(key: int32) : raylib-io bool
-  c "kk_is_key_released"
-
-pub extern is-key-up(key: int32) : raylib-io bool
-  c "kk_is_key_up"
-
-pub extern get-key-pressed() : raylib-io int32
-  c "kk_get_key_pressed"
-
-// ----------------------------------------------------------------------
-// Input: mouse
-// ----------------------------------------------------------------------
-
-pub extern is-mouse-button-pressed(button: int32) : raylib-io bool
-  c "kk_is_mouse_button_pressed"
-
-pub extern is-mouse-button-down(button: int32) : raylib-io bool
-  c "kk_is_mouse_button_down"
-
-pub extern is-mouse-button-released(button: int32) : raylib-io bool
-  c "kk_is_mouse_button_released"
-
-pub extern is-mouse-button-up(button: int32) : raylib-io bool
-  c "kk_is_mouse_button_up"
-
-pub extern xget-mouse-x() : raylib-io float64
-  c "kk_get_mouse_x"
-
-pub extern xget-mouse-y() : raylib-io float64
-  c "kk_get_mouse_y"
-
-pub fun get-mouse-position() : raylib-io vector2
-  Vector2(xget-mouse-x(), xget-mouse-y())
-
-pub extern xget-mouse-wheel-move() : raylib-io float64
-  c "kk_get_mouse_wheel_move"
-pub fun get-mouse-wheel-move() : raylib-io float64 { xget-mouse-wheel-move() }
-
 
 // This is just for testing out some stuff
 fun main() {

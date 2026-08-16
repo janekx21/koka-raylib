@@ -71,9 +71,9 @@
             #   --ccopts="$(pkg-config --cflags raylib)" \
             #   --cclinkopts="$(pkg-config --libs raylib)"            
 
-            echo "koka-raylib dev shell"
-            echo "  koka:   $(koka --version 2>/dev/null || echo 'not found')"
-            echo "  raylib: ${pkgs.raylib.version}"
+            # echo "koka-raylib dev shell"
+            # echo "  koka:   $(koka --version 2>/dev/null || echo 'not found')"
+            # echo "  raylib: ${pkgs.raylib.version}"
           '';
         };
 
