@@ -112,8 +112,11 @@ int32_t kk_get_fps(kk_context_t* ctx) {
 // Shapes
 // ------------------------------------------------------------------
 
-kk_unit_t kk_draw_pixel(double x, double y, int32_t r, int32_t g, int32_t b, int32_t a, kk_context_t* ctx) {
-    DrawPixelV((Vector2){ (float)x, (float)y }, (Color){ (unsigned char)r, (unsigned char)g, (unsigned char)b, (unsigned char)a });
+kk_unit_t kk_draw_pixel(kk_raylib__vector2 pos, kk_raylib__rgba color, kk_context_t* ctx) {
+    struct kk_raylib_Vector2* pos_ = kk_raylib__as_Vector2(pos, ctx);
+    struct kk_raylib_Rgba* color_ = kk_raylib__as_Rgba(color, ctx);
+    
+    DrawPixelV((Vector2){ (float)pos_->x, (float)pos_->y }, (Color){ (unsigned char)color_->r, (unsigned char)color_->g, (unsigned char)color_->b, (unsigned char)color_->a });
     return kk_Unit;
 }
 

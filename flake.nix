@@ -42,6 +42,12 @@
             darwin.apple_sdk.frameworks.CoreVideo
             darwin.apple_sdk.frameworks.OpenGL
           ];
+
+        run-game = pkgs.writeShellScriptBin "run" ''
+          koka game.kk -e \
+            --ccopts="$(pkg-config --cflags raylib)" \
+            --cclinkopts="$(pkg-config --libs raylib)"
+        '';
       in
       {
         devShells.default = pkgs.mkShell {
@@ -57,6 +63,8 @@
               cmake # raylib build/example tooling sometimes wants this
             ]
             ++ raylibDeps;
+
+          nativeBuildInputs = [ run-game ];
 
           shellHook = ''
             export PKG_CONFIG_PATH="${pkgs.raylib}/lib/pkgconfig:$PKG_CONFIG_PATH"

@@ -32,7 +32,7 @@ pub struct vector2
   y : float64
 
 pub fun show(a : vector2) : string
-  "<" ++ show-fixed(a.x, 2) ++ "," ++ show-fixed(a.y, 2) ++ ">"
+  "Vector2(" ++ show-fixed(a.x, 2) ++ ", " ++ show-fixed(a.y, 2) ++ ")"
 
 
 pub fun (+)(a : vector2, b : vector2) : vector2
@@ -217,9 +217,8 @@ pub extern xget-mouse-y() : raylib-io float64
 pub fun get-mouse-position() : raylib-io vector2
   Vector2(xget-mouse-x(), xget-mouse-y())
 
-pub extern xget-mouse-wheel-move() : raylib-io float64
+pub extern get-mouse-wheel-move() : raylib-io float64
   c "kk_get_mouse_wheel_move"
-pub fun get-mouse-wheel-move() : raylib-io float64 { xget-mouse-wheel-move() }
 
 
 // ----------------------------------------------------------------------
@@ -228,10 +227,8 @@ pub fun get-mouse-wheel-move() : raylib-io float64 { xget-mouse-wheel-move() }
 
 // TODO cleanup extern functions
 
-pub extern xdraw-pixel(x: float64, y: float64, r: int32, g: int32, b: int32, a: int32) : raylib-io ()
+pub extern draw-pixel(pos: vector2, color: rgba) : raylib-io ()
   c "kk_draw_pixel"
-pub fun draw-pixel(pos: vector2, color: rgba) : raylib-io ()
-  xdraw-pixel(pos.x, pos.y, color.r, color.g, color.b, color.a)
 
 pub extern xdraw-line(x1: float64, y1: float64, x2: float64, y2: float64, r: int32, g: int32, b: int32, a: int32) : raylib-io ()
   c "kk_draw_line"
@@ -282,19 +279,19 @@ pub extern xdraw-poly(cx: float64, cy: float64, sides: int32, radius: float64, r
 pub fun draw-poly(center: vector2, sides: int32, radius: float64, rotation: float64, color: rgba) : raylib-io ()
   xdraw-poly(center.x, center.y, sides, radius, rotation, color.r, color.g, color.b, color.a)
 
-pub extern xcheck-collision-recs(x1: float64, y1: float64, w1: float64, h1: float64, x2: float64, y2: float64, w2: float64, h2: float64) : raylib-io bool
+pub extern xcheck-collision-recs(x1: float64, y1: float64, w1: float64, h1: float64, x2: float64, y2: float64, w2: float64, h2: float64) : bool
   c "kk_check_collision_recs"
-pub fun check-collision-recs(a: rect, b: rect) : raylib-io bool
+pub fun check-collision-recs(a: rect, b: rect) : bool
   xcheck-collision-recs(a.x, a.y, a.w, a.h, b.x, b.y, b.w, b.h)
 
-pub extern xcheck-collision-circles(x1: float64, y1: float64, r1: float64, x2: float64, y2: float64, r2: float64) : raylib-io bool
+pub extern xcheck-collision-circles(x1: float64, y1: float64, r1: float64, x2: float64, y2: float64, r2: float64) : bool
   c "kk_check_collision_circles"
-pub fun check-collision-circles(center1: vector2, radius1: float64, center2: vector2, radius2: float64) : raylib-io bool
+pub fun check-collision-circles(center1: vector2, radius1: float64, center2: vector2, radius2: float64) : bool
   xcheck-collision-circles(center1.x, center1.y, radius1, center2.x, center2.y, radius2)
 
-pub extern xcheck-collision-point-rec(px: float64, py: float64, x: float64, y: float64, w: float64, h: float64) : raylib-io bool
+pub extern xcheck-collision-point-rec(px: float64, py: float64, x: float64, y: float64, w: float64, h: float64) : bool
   c "kk_check_collision_point_rec"
-pub fun check-collision-point-rec(point: vector2, rectangle: rect) : raylib-io bool
+pub fun check-collision-point-rec(point: vector2, rectangle: rect) : bool
   xcheck-collision-point-rec(point.x, point.y, rectangle.x, rectangle.y, rectangle.w, rectangle.h)
 
 // ----------------------------------------------------------------------
