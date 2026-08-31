@@ -5,6 +5,7 @@ import raylib
 struct player
   pos : vector2
   vel : vector2
+  hp : int
 
 fun draw(player : player)
   draw-circle2(player.pos, 16.0, blue)
@@ -23,11 +24,19 @@ fun update(player : player, dt : float64) : raylib-io player
   player(pos = player.pos + player.vel * dt * 64.0, vel = vel-add * 0.1 + player.vel * 0.9)
   
 
+// struct enemy
+//   pos : vector2
+//   hp : int
+
+// fun move-to(enemy : enemy, dt : float64, target : vector2) : enemy
+//   val vel = enemy.pos - target
+//   enemy(pos = enemy.pos + vel)
+
 // This is just for testing out some stuff
-fun main() {
+fun main()
   init-window(800.i32, 450.i32, "raylib + koka")
   set-target-fps(144.i32)
-  var player := Player(Vector2(200.0,200.0), raylib/zero)
+  var player := Player(Vector2(200.0,200.0), raylib/zero, 3)
   while (fn() !(window-should-close()))
     val dt = get-frame-time()
     begin-drawing()
@@ -43,4 +52,4 @@ fun main() {
     end-drawing()
   
   close-window()
-}
+
