@@ -1,3 +1,7 @@
+# Raylib bindings for koka programming language
+
+![](img/Screenshot_20260831_202959.png)
+
 Running game example
 
 ```bash
